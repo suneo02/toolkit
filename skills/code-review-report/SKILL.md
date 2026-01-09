@@ -1,38 +1,31 @@
 ---
 name: code-review-report
-description: 生成结构化代码审查报告的流程与格式，包含需求实现完整性、线上风险评估、变更范围控制与代码规范符合性四大维度。用于用户要求代码审查或需要输出固定 Markdown 报告时。
+description: 生成精简且聚焦问题的中文代码审查报告，输出固定 Markdown 模板。用于用户要求代码审查或需要结构化问题清单与风险评估时。
 ---
 
 # Code Review Report
 
-## Overview
+## 概览
 
-根据固定模板输出中文代码审查报告，覆盖需求实现、风险、变更范围与规范符合性四个维度。
+用最小字数输出中文审查报告，聚焦问题、风险、缺失与建议；无问题则明确说明。
 
-## Workflow
+## 流程
 
-1. 确认审查范围：基准分支、提交哈希范围、需求描述或相关 spec。
-2. 收集变更：对比 diff，定位涉及的模块与关键逻辑。
-   - 可选：运行 scripts/generate-diff-report.js 生成 diff 报告并作为审查输入。
-3. 逐项评估：按四个维度给出结论，只有不通过时列出问题与建议。
-4. 输出报告：严格使用模板，生成完整 Markdown 文档，避免额外说明。
+1) 确认范围：基准分支、提交范围、需求或 spec。
+2) 阅读变更：定位关键逻辑、数据流与边界处理。
+3) 形成问题清单：仅列出问题，按严重度排序；每条包含文件/行、影响与建议。
+4) 按模板输出：严格使用模板，避免额外解释。
 
-## Prompts To Ask When Info Is Missing
+## 缺失信息提示
 
-- 基准分支与审查的提交范围是什么？
+- 基准分支与提交范围是什么？
 - 是否有需求文档或 spec 可以对齐？
 - 是否只输出报告正文（Markdown）？
 
-## References
+## 参考
 
-- 审查模板与标准：references/code-review-rule.md
+- references/code-review-rule.md
 
-## Resources
+## 资源（可选）
 
-### scripts/generate-diff-report.js
-
-生成变更范围的 Markdown 概览（diffstat + 文件列表）。
-
-```bash
-node scripts/generate-diff-report.js --base main --head HEAD --repo /path/to/repo --out /tmp/diff-report.md
-```
+- scripts/generate-diff-report.js：生成变更范围摘要。
