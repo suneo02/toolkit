@@ -1,65 +1,65 @@
 ---
 name: quality-static-analysis
-description: 在 JS/TS 项目中执行静态质量检查并生成问题报告。适用于依赖循环分析、TypeScript tsc 类型检查、基础 lint 规则检查，或需要输出静态检查问题清单与风险摘要的场景。
+description: Run static quality checks in JS/TS projects and generate issue reports. Use for dependency cycle analysis, TypeScript tsc checks, basic lint checks, or when a static check issue list and risk summary are required.
 ---
 
-# 质量静态分析
+# Static Quality Analysis
 
-## 概览
+## Overview
 
-执行依赖循环分析、tsc 类型检查与基础 lint 检查，汇总可复现的问题报告。优先使用仓库内已有脚本与依赖，不进行联网安装。
+Run dependency cycle analysis, tsc type checks, and basic lint checks, then summarize reproducible issues. Prefer existing repo scripts and dependencies. Do not install packages or use the network.
 
-## 工作流
+## Workflow
 
-### 1) 识别工具与入口
+### 1) Identify tools and entry points
 
-- 确定运行根目录：优先在仓库根（存在 `package.json`/`pnpm-workspace.yaml`）。
-- 从 `package.json` 的 `scripts` 里识别可用命令：`lint`、`typecheck`、`tsc`、`depcruise`、`madge` 等。
-- 仅使用已安装依赖：优先 `pnpm run <script>`，其次 `pnpm exec <tool>`。
+- Determine the working root: prefer the repo root (has `package.json`/`pnpm-workspace.yaml`).
+- Identify available commands from `package.json` scripts: `lint`, `typecheck`, `tsc`, `depcruise`, `madge`, etc.
+- Use only installed dependencies: prefer `pnpm run <script>`, then `pnpm exec <tool>`.
 
-### 2) 依赖循环分析
+### 2) Dependency cycle analysis
 
-- 优先路径：
-  - 若存在脚本：`pnpm run depcruise`/`pnpm run madge`/`pnpm run lint:cycle`。
-  - 若存在工具：
-    - `pnpm exec madge --circular <目标目录>`
-    - `pnpm exec depcruise --validate <配置文件> <目标目录>`
-- 目标目录选择：优先 `src` 或 `packages`，不存在则用 `.`，排除 `node_modules`/`dist`/`build`。
-- 若无工具可用，在报告中标注“未配置依赖循环分析工具”。
+- Preferred paths:
+  - If scripts exist: `pnpm run depcruise`/`pnpm run madge`/`pnpm run lint:cycle`.
+  - If tools exist:
+    - `pnpm exec madge --circular <target_dir>`
+    - `pnpm exec depcruise --validate <config_file> <target_dir>`
+- Target directory selection: prefer `src` or `packages`, otherwise use `.`, and exclude `node_modules`/`dist`/`build`.
+- If no tools are available, note "dependency cycle analysis not configured" in the report.
 
-### 3) tsc 类型检查
+### 3) tsc type check
 
-- 优先路径：
+- Preferred paths:
   - `pnpm run typecheck`
   - `pnpm run tsc`
-- 若无脚本：
+- If no scripts:
   - `pnpm exec tsc -p tsconfig.json --noEmit`
-- 若存在多份 `tsconfig.json`：优先根目录；若根目录不存在，按包逐个执行并在报告中分别记录。
+- If multiple `tsconfig.json` files exist: prefer the root; if none, run per package and record results separately in the report.
 
-### 4) 基础 lint 检查
+### 4) Basic lint check
 
-- 优先路径：
+- Preferred path:
   - `pnpm run lint`
-- 若无脚本但存在 eslint 配置：
+- If no script but eslint config exists:
   - `pnpm exec eslint . --ext .ts,.tsx,.js,.jsx`
-- 若无 lint 工具可用，在报告中标注“未配置基础 lint 检查”。
+- If no lint tool is available, note "basic lint check not configured" in the report.
 
-### 5) 生成问题报告
+### 5) Generate issue report
 
-- 使用统一模板输出报告。
-- 每个问题必须包含：检查项、触发命令、位置、关键输出、影响与建议。
-- 将缺失工具、命令失败或无法运行的原因写入报告。
+- Use the unified template to output the report.
+- Each issue must include: check item, command, location, key output, impact, and recommendation.
+- Record missing tools, failed commands, or reasons a command cannot run.
 
 @see references/report-template.md
 
-## 输出要求
+## Output requirements
 
-- 报告语言：中文
-- 报告结构：保持模板标题与字段顺序
-- 结果可信：记录实际运行命令与关键输出片段
+- Report language: Chinese
+- Report structure: keep template headings and field order
+- Result reliability: record actual commands and key output snippets
 
-## 资源
+## Resources
 
 ### references/
 
-- `report-template.md`：静态检查问题报告模板
+- `report-template.md`: static check issue report template

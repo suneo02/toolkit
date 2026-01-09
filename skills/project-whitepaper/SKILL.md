@@ -7,7 +7,7 @@ description: Create comprehensive project-level technical whitepapers using the 
 
 ## Overview
 
-Write a full project whitepaper that converts a codebase or project into structured technical assets. Default output is Markdown. Default language is Chinese unless the user requests otherwise. Always comply with the baseline rules for evidence, metrics, and business context.
+Write a full project whitepaper that converts a codebase or project into structured technical assets. Default output is Markdown. Output language must be Chinese. Always comply with the baseline rules for evidence, metrics, and business context.
 
 ## References
 
@@ -32,7 +32,7 @@ Write a full project whitepaper that converts a codebase or project into structu
 3. Draft the whitepaper in the reference order.
    - Big Picture: one-sentence business background, Mermaid architecture diagram, and ADR comparison table.
    - Core Features: 2-3 modules, implementation flow (sequence or state machine), and data schema.
-   - Deep Dive: symptoms, investigation, failed attempt, successful solution, and a <20-line code snippet with comments.
+   - Deep Dive: symptoms, investigation, failed attempt, successful solution, and a <20-line code snippet with Chinese comments.
    - Post-Mortem: incident timeline, root cause, and action items.
    - Knowledge Base: reusable snippets, configs, or pitfalls.
    - Quality Protocol: checklist confirming compliance with baseline rules.
@@ -46,41 +46,46 @@ Write a full project whitepaper that converts a codebase or project into structu
 ## Output Skeleton
 
 ```markdown
-# <Project Name> Whitepaper
+# <项目名称> 白皮书
 
-## 1. Big Picture (Situation & Task)
-- Business background:
-- Architecture diagram (Mermaid):
-- ADR decision table:
+## 1. 全景（Situation & Task）
+- 业务背景：
+- 架构图（Mermaid）：
+- ADR 决策表：
 
-## 2. Core Features & Implementation (Action - Construction)
-- Feature 1:
-- Feature 2:
-- Feature 3 (optional):
-- Implementation flow (sequence/state machine):
-- Data schema:
-- Complexity notes:
+## 2. 核心功能与实现（Action - Construction）
+- 功能 1：
+- 功能 2：
+- 功能 3（可选）：
+- 实现流程（时序/状态机）：
+- 数据结构：
+- 复杂度说明：
 
-## 3. Deep Dive Case Study (Action - Optimization & Result)
-- Symptoms:
-- Investigation:
-- Solution V1 (failed):
-- Solution V2 (final):
-- Code snippet (<20 lines):
-- Measured results:
+## 3. 深挖案例（Action - Optimization & Result）
+- 现象：
+- 排查过程：
+- 方案 V1（失败）：
+- 方案 V2（最终）：
+- 代码片段（<20 行）：
+- 量化结果：
 
-## 4. Post-Mortem (Action & Legacy)
-- Timeline:
-- Root cause:
-- Action items:
+## 4. 事故复盘（Action & Legacy）
+- 时间线：
+- 根因：
+- 行动项：
 
-## 5. Knowledge Base (Legacy)
-- Snippet 1:
-- Snippet 2:
-- Pitfalls:
+## 5. 知识库（Legacy）
+- 片段 1：
+- 片段 2：
+- 注意事项：
 
-## 6. Quality Protocol Checklist
-- [ ] Evidence check (before/after metrics or artifacts)
-- [ ] Code check (anonymized, no imports, relevant)
-- [ ] Logic check (tech choices tied to business context)
+## 6. 质量协议清单
+- [ ] 证据检查（前后对比指标或证据）
+- [ ] 代码检查（脱敏、无 import、与问题相关）
+- [ ] 逻辑检查（技术选择与业务关联）
 ```
+
+## Language Requirements
+
+- Whitepaper content must be written in Chinese.
+- Code comments inside snippets must be written in Chinese.

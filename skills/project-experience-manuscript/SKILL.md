@@ -34,6 +34,10 @@ Provide:
 - Defensive Q&A set (trade-off, fundamentals, reflection)
 - Three-round mock interview prompts
 
+## Language Requirements
+
+- All manuscript content must be written in Chinese.
+
 ## Guardrails
 
 - No invented metrics or claims.

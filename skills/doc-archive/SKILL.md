@@ -1,33 +1,33 @@
 ---
 name: doc-archive
-description: 生成和维护中文对话归档/项目归档文档；支持从 docs/specs 与 git 提交生成条目。用于：归档对话、补写历史记录、基于 spec 或 git 日志形成归档总结时。
+description: Create and maintain Chinese conversation/project archive docs; supports generating entries from docs/specs and git history. Use for archiving dialogues, backfilling history, or summarizing from spec/git logs.
 ---
 
-# 对话归档（Doc Archive）
+# Doc Archive
 
-## 目标
-在本仓库生成或追加对话/项目归档，内容必须中文、结构化、可检索。
+## Objective
+Create or append conversation/project archives in this repo. Content must be Chinese, structured, and searchable.
 
-## 核心流程
-1. 判断对话类型：新对话或延续对话，不确定先问清楚。
-2. 澄清参数：来源（对话/spec/git）、时间范围、作者/用户、模型标记、输出目录与文件名。
-3. 获取时间戳：执行 `date "+%Y-%m-%d %H:%M"`。
-4. 收集历史数据（需要时）：
-   - spec：读取 `docs/specs/**` 与 `implementation-plan.json`。
-   - git：运行 `scripts/git_history_query.py` 按时间/作者/路径过滤。
-5. 写入归档：
-   - 新建：生成标题候选（关键词 + 日期）并确认；写入文件头模板。
-   - 追加：必须先读取目标文件的全部内容，再拼接新记录整体写回。
-6. 输出确认：主答复后追加“对话记录已更新”块，说明文件状态与摘要。
+## Core Flow
+1. Determine dialog type: new or continued; ask if unclear.
+2. Confirm parameters: source (dialog/spec/git), time range, author/user, model tag, output dir and filename.
+3. Get timestamp: run `date "+%Y-%m-%d %H:%M"`.
+4. Collect historical data (when needed):
+   - spec: read `docs/specs/**` and `implementation-plan.json`.
+   - git: run `scripts/git_history_query.py` with time/author/path filters.
+5. Write archive:
+   - New: propose a title (keywords + date) and confirm; write the header template.
+   - Append: must read the full target file first, then append and write back the merged content.
+6. Output confirmation: after the main response, append the "对话记录已更新" block with status and summary.
 
-## 参数清单（需确认）
-- 归档来源：对话、spec、git 或组合。
-- 时间范围：`since`、`until`。
-- 作者/用户：用于 git 过滤。
-- 模型标记：记录在标题或条目中。
-- 输出目录与文件名：无固定路径，按用户/项目约定确认。
+## Parameters to Confirm
+- Archive source: dialog, spec, git, or a combination.
+- Time range: `since`, `until`.
+- Author/user: for git filtering.
+- Model tag: recorded in the title or entries.
+- Output directory and filename: no fixed path; confirm with user/project conventions.
 
-## 归档记录结构（最小模板）
+## Entry Structure (Minimal Template)
 ```markdown
 ## [序号] [YYYY-MM-DD HH:MM] [会话标签]【模型】
 
@@ -47,7 +47,7 @@ description: 生成和维护中文对话归档/项目归档文档；支持从 do
 [与历史记录的关联或后续提示]
 ```
 
-## 文件头模板（新建）
+## File Header Template (New File)
 ```markdown
 # [对话主题]
 
@@ -59,7 +59,7 @@ description: 生成和维护中文对话归档/项目归档文档；支持从 do
 ---
 ```
 
-## 输出确认块
+## Confirmation Block
 ```markdown
 ---
 
@@ -70,15 +70,15 @@ description: 生成和维护中文对话归档/项目归档文档；支持从 do
 **下次延续提示**：如需继续此话题，请提及"[关键词]"
 ```
 
-## 归档要点（简化）
-- spec：提取 `docs/specs/<task>/README.md`、`implementation-plan.json` 的目标/状态/@see 路径，避免粘贴大段代码。
-- git：`scripts/git_history_query.py` 支持 `--since/--until/--author/--path/--format md`。
+## Archiving Notes (Short)
+- spec: extract goals/status/@see paths from `docs/specs/<task>/README.md` and `implementation-plan.json`; avoid large code dumps.
+- git: `scripts/git_history_query.py` supports `--since/--until/--author/--path/--format md`.
 
-## 约束
-- 日志正文必须中文。
-- 追加时必须先读全量旧内容再写回。
-- 内容与实际回复保持一致，保留关键细节。
+## Constraints
+- Log content must be in Chinese.
+- Appends must read the full existing file before writing back.
+- Content must match the actual response and keep key details.
 
 ## References
 
-- 模板：references/archive-templates.md
+- Templates: references/archive-templates.md

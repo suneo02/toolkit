@@ -1,31 +1,35 @@
 ---
 name: code-review-report
-description: 生成精简且聚焦问题的中文代码审查报告，输出固定 Markdown 模板。用于用户要求代码审查或需要结构化问题清单与风险评估时。
+description: Generate a concise, issue-focused Chinese code review report using a fixed Markdown template. Use when a code review or a structured issue list/risk assessment is requested.
 ---
 
 # Code Review Report
 
-## 概览
+## Overview
 
-用最小字数输出中文审查报告，聚焦问题、风险、缺失与建议；无问题则明确说明。
+Produce a minimal-length Chinese review report focused on issues, risks, gaps, and recommendations. If there are no issues, say so explicitly.
 
-## 流程
+## Workflow
 
-1) 确认范围：基准分支、提交范围、需求或 spec。
-2) 阅读变更：定位关键逻辑、数据流与边界处理。
-3) 形成问题清单：仅列出问题，按严重度排序；每条包含文件/行、影响与建议。
-4) 按模板输出：严格使用模板，避免额外解释。
+1) Confirm scope: base branch, commit range, requirements, or spec.
+2) Read changes: locate key logic, data flow, and boundary handling.
+3) Build issue list: issues only, ordered by severity; each includes file/line, impact, and recommendation.
+4) Output with the template: follow it strictly and avoid extra explanation.
 
-## 缺失信息提示
+## Missing Info Prompts
 
-- 基准分支与提交范围是什么？
-- 是否有需求文档或 spec 可以对齐？
-- 是否只输出报告正文（Markdown）？
+- What are the base branch and commit range?
+- Is there a requirement doc or spec to align with?
+- Should I output only the report body (Markdown)?
 
-## 参考
+## Language Requirements
+
+- The report must be written in Chinese.
+
+## References
 
 - references/code-review-rule.md
 
-## 资源（可选）
+## Resources (Optional)
 
-- scripts/generate-diff-report.js：生成变更范围摘要。
+- scripts/generate-diff-report.js: generate a change-range summary.

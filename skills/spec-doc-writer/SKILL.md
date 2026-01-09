@@ -1,33 +1,38 @@
 ---
 name: spec-doc-writer
-description: 编写与维护项目 spec 文档与 implementation-plan.json 的工作流与规范（docs/specs/任务名/README.md、implementation-plan.json、spec-*.md）。当需要做任务拆解、验证计划、生成 spec 索引或更新 spec 状态时使用，遵循 references/spec-doc-rule.md 的格式与 @see 引用规则。
+description: Workflow and standards for writing and maintaining spec docs and implementation-plan.json (docs/specs/<task>/README.md, implementation-plan.json, spec-*.md). Use for task breakdowns, validation plans, spec index generation, or spec status updates. Follow references/spec-doc-rule.md formats and @see rules.
 ---
 
 # Spec Doc Writer
 
 ## Overview
 
-遵循仓库 spec 规范，生成或更新 docs/specs/<task>/ 下的 README.md、implementation-plan.json 与 spec-*.md，并保持双向 @see 引用与任务状态跟踪。
+Follow repo spec conventions to create or update README.md, implementation-plan.json, and spec-*.md under docs/specs/<task>/, maintaining bidirectional @see references and task status tracking.
 
 ## Workflow
 
-1. 收集输入：任务名称、目标/范围、owner、关键代码路径、验收标准、需要的子文档类型（design/api/testing 等）。
-2. 确定目录：在 docs/specs/<task>/ 创建 README.md、implementation-plan.json、spec-*.md。
-3. 编写 README.md：包含状态、索引、链接；使用 references/spec-templates.md 中的模板；保持中文。
-4. 编写 implementation-plan.json：列出任务数组；所有任务初始 status 为 failed；使用绝对路径与 @see。
-5. 编写 spec-*.md：每个主题独立文件，控制长度 <= 150 行；避免大段代码，只保留必要片段。
-6. 建立双向引用：文档内用 @see 指向代码；代码内用注释指向 spec。
-7. 校验规则：对照 references/spec-doc-rule.md 的清单；状态更新必须逐条验证，保持原子提交。
-8. 输出结果：汇报新增/更新的文件路径与待确认问题。
+1. Collect inputs: task name, goals/scope, owner, key code paths, acceptance criteria, and required sub-doc types (design/api/testing, etc.).
+2. Confirm directory: create README.md, implementation-plan.json, and spec-*.md under docs/specs/<task>/.
+3. Write README.md: include status, index, and links; use templates in references/spec-templates.md; keep it in Chinese.
+4. Write implementation-plan.json: list task array; default all task status to failed; use absolute paths and @see.
+5. Write spec-*.md: one topic per file, keep length <= 150 lines; avoid large code blocks, include only necessary snippets.
+6. Create bidirectional references: docs use @see to point to code; code comments point back to spec.
+7. Validate rules: check against references/spec-doc-rule.md; status updates must be verified one by one and kept atomic.
+8. Output result: report new/updated file paths and open questions.
 
 ## Prompts To Ask When Info Is Missing
 
-- 任务名称与目录名用什么？
-- owner 与验收标准是什么？
-- 需要哪些子文档（design/api/testing/others）？
-- 关键代码路径与 @see 目标是什么？
+- What should the task name and directory be?
+- Who is the owner and what are the acceptance criteria?
+- Which sub-docs are needed (design/api/testing/others)?
+- What are the key code paths and @see targets?
+
+## Language Requirements
+
+- All spec documents and templates must be written in Chinese.
+- Code comments used for @see links must be written in Chinese.
 
 ## References
 
-- 规范摘要：references/spec-doc-rule.md
-- 模板示例：references/spec-templates.md
+- Rule summary: references/spec-doc-rule.md
+- Template examples: references/spec-templates.md

@@ -33,13 +33,17 @@ description: Create or rewrite project experience entries in resume format with 
 Use this Markdown template:
 
 ```markdown
-[Project Name] | [Role] | [Time]
-[Business type] platform serving [users], daily [PV/UV/orders]. Stack: [Tech 1] + [Tech 2] + ...
-- [Verb] [module/object], using [method] to achieve [metric/result]
-- [Verb] [module/object], introducing [tech/mechanism] to move [metric] from [A] to [B]
-- [Verb] [module/object], building [asset/standard] to support [business scenario]
-- (Optional) [Verb] [quality/stability item], reducing [incident/time/cost] by [ratio]
+[项目名称] | [角色] | [时间]
+[业务类型]平台，服务于[用户群体]，日均[PV/UV/单量]。技术栈：[技术1] + [技术2] + ...
+- [动词] [模块/对象]，通过 [方法] 实现 [指标/结果]
+- [动词] [模块/对象]，引入 [技术/机制] 将 [指标] 从 [A] 提升/降低至 [B]
+- [动词] [模块/对象]，构建 [资产/规范] 支撑 [业务场景]
+- （可选）[动词] [质量/稳定性项]，将 [事故/耗时/成本] 降低 [比例]
 ```
+
+## Language Requirements
+
+- Resume output must be written in Chinese.
 
 ## Quality Gates
 

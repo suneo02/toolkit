@@ -37,6 +37,10 @@ Provide one of the following based on the request:
 - Routing result: recommended document type, required inputs, and next action.
 - Audit result: short compliance report (pass/fail with must-fix items), revised text, and questions for missing data.
 
+## Language Requirements
+
+- All produced documents and report outputs must be written in Chinese.
+
 ## Guardrails
 
 - Do not invent metrics or capabilities.
