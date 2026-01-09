@@ -1,6 +1,6 @@
 ---
 name: doc-archive
-description: 生成和维护中文对话归档/项目归档文档，遵循 docs/rule/doc-archive-rule.md 的结构与格式；支持从 docs/specs 历史与 git commit 历史生成归档条目，并按用户指定的时间范围、作者与模型标记输出。用于：归档对话、补写历史记录、基于 spec 或 git 日志形成归档总结时。
+description: 生成和维护中文对话归档/项目归档文档，遵循 references/doc-archive-rule.md 的结构与格式；支持从 docs/specs 历史与 git commit 历史生成归档条目，并按用户指定的时间范围、作者与模型标记输出。用于：归档对话、补写历史记录、基于 spec 或 git 日志形成归档总结时。
 ---
 
 # Doc Archive
@@ -13,7 +13,7 @@ description: 生成和维护中文对话归档/项目归档文档，遵循 docs/
 2. 澄清关键参数：确认归档来源（对话/spec/git）、时间范围、作者/用户、模型标记、输出目录与文件名。
 3. 获取时间戳：执行 `date "+%Y-%m-%d %H:%M"` 作为记录时间。
 4. 收集历史数据（需要时）：
-   - spec 文档：读取 `docs/specs/**` 与相关 `implementation-plan.json`；必要时查阅 `docs/rule/doc-spec-rule.md`。
+   - spec 文档：读取 `docs/specs/**` 与相关 `implementation-plan.json`。
    - git 历史：运行 `scripts/git_history_query.py` 按时间/作者/路径过滤。
 5. 生成归档内容：
    - 新建：生成标题候选（关键词 + 日期）并让用户确认；写入文件头。
@@ -40,8 +40,12 @@ description: 生成和维护中文对话归档/项目归档文档，遵循 docs/
 ## Spec 文档归档要点
 - 提取 `docs/specs/<task>/README.md`、`implementation-plan.json` 中的目标、状态与 @see 路径。
 - 避免粘贴大段代码；只引用关键文件路径与变更要点。
-- 需要细则时查阅 `docs/rule/doc-spec-rule.md`。
 
 ## 归档格式
 - 读取 `references/archive-templates.md` 获取标题、记录块与结尾提示模板。
 - 保持中文、结构化、可检索。
+
+## References
+
+- 归档规范：references/doc-archive-rule.md
+- 模板：references/archive-templates.md

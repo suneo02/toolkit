@@ -16,7 +16,7 @@
 
 ## 链接
 
-- 规范：/docs/rule/doc-spec-rule.md
+- 规范：references/spec-doc-rule.md
 - 实现计划：implementation-plan.json
 - 代码：@see /apps/example/src/index.ts
 
