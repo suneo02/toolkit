@@ -5,15 +5,18 @@ A collection of AI agent skills for documenting, archiving, and structuring proj
 ## Skills Overview
 
 ### 1. **Doc Archive** (`doc-archive/`)
+
 Generates and maintains conversation and project archives in Chinese, following structured formatting rules.
 
 **Use cases:**
+
 - Archive conversations and dialogue histories
 - Generate archive entries from Git commit histories
 - Compile historical spec documents into archive summaries
 - Filter and organize archives by time range, author, and model tags
 
 **Key features:**
+
 - Supports sources: conversations, specs, Git logs
 - Parameterized filtering (date range, author, path)
 - Automated timestamp tracking
@@ -23,9 +26,11 @@ Generates and maintains conversation and project archives in Chinese, following 
 ---
 
 ### 2. **Project Experience Baseline** (`project-experience-baseline/`)
+
 Validates and routes project experience content across different document formats, ensuring truthfulness and quality compliance.
 
 **Use cases:**
+
 - Audit project experience content for quality and accuracy
 - Route requests to appropriate document types (whitepaper/resume/manuscript)
 - Validate technical claims against evidence
@@ -33,6 +38,7 @@ Validates and routes project experience content across different document format
 - Apply STAR-Plus framework compliance checks
 
 **Key features:**
+
 - Decision flow for content routing
 - Comprehensive audit workflow
 - Evidence traceability enforcement
@@ -43,15 +49,18 @@ Validates and routes project experience content across different document format
 ---
 
 ### 3. **Project Experience Resume** (`project-experience-resume/`)
+
 Creates high-density, ATS-safe resume entries for project experience using STAR-L compression.
 
 **Use cases:**
+
 - Draft or rewrite project experience sections for resumes
 - Convert whitepapers, code, and notes into 1-line summary + 3-4 bullets
 - Optimize resume bullets for signal-to-noise ratio
 - Compress technical achievements into recruitment-friendly format
 
 **Key features:**
+
 - STAR-L (Lite) compression format
 - High-density bullet construction
 - Scale metrics integration (PV/UV/orders/concurrency)
@@ -63,9 +72,11 @@ Creates high-density, ATS-safe resume entries for project experience using STAR-
 ---
 
 ### 4. **Project Experience Manuscript** (`project-experience-manuscript/`)
+
 Creates interview-ready project experience narratives with defensive Q&A and deep-dive explanations.
 
 **Use cases:**
+
 - Draft oral scripts for technical interviews
 - Create 60-second hooks and deep-dive narratives
 - Prepare defensive Q&A for technical challenges
@@ -73,6 +84,7 @@ Creates interview-ready project experience narratives with defensive Q&A and dee
 - Structure STAR-Plus narratives with trade-off analysis
 
 **Key features:**
+
 - 60-second hook structure
 - STAR-Plus deep-dive expansion
 - Defensive Q&A preparation (trade-offs, fundamentals, reflection)
@@ -83,9 +95,11 @@ Creates interview-ready project experience narratives with defensive Q&A and dee
 ---
 
 ### 5. **Project Whitepaper** (`project-whitepaper/`)
+
 Generates comprehensive technical whitepapers documenting full project architecture, decisions, and implementations.
 
 **Use cases:**
+
 - Create full project-level technical documentation
 - Document architecture decisions with ADR tables
 - Build technical asset documentation
@@ -94,6 +108,7 @@ Generates comprehensive technical whitepapers documenting full project architect
 - Compile knowledge base snippets
 
 **Key features:**
+
 - STAR-Plus framework integration
 - Mermaid architecture diagrams
 - ADR (Architecture Decision Record) tables
@@ -106,9 +121,11 @@ Generates comprehensive technical whitepapers documenting full project architect
 ---
 
 ### 6. **Spec Doc Writer** (`spec-doc-writer/`)
+
 Structures and maintains specification documents following repository conventions with implementation planning and status tracking.
 
 **Use cases:**
+
 - Create spec documentation for tasks (`docs/specs/<task>/`)
 - Break down tasks into manageable specifications
 - Maintain implementation plans with status tracking
@@ -116,6 +133,7 @@ Structures and maintains specification documents following repository convention
 - Validate spec completion and status
 
 **Key features:**
+
 - README.md generation with task indices
 - `implementation-plan.json` with atomic task tracking
 - Modular `spec-*.md` files (max 150 lines each)
