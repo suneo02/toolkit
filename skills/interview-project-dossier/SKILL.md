@@ -59,15 +59,18 @@ Write a full project dossier that converts a project into structured technical a
 ### Axioms of Truth
 
 Rule #1: No Anchor, No Claim
+
 - Every key technical claim must be traceable to a design doc section (with path) and/or a metric source.
 - Audit question: "Show the design doc section/path or metric source that proves this."
 
 Rule #2: Metrics over Adjectives
+
 - Do not use vague adjectives (e.g., "significant", "massive").
 - Use measurable results (e.g., "FCP reduced by 200ms", "Crash rate reduced by 0.1%").
 - If no hard data is available, use verified qualitative signals (e.g., "reduced customer complaints").
 
 Rule #3: Context is King
+
 - Tie technical decisions to business outcomes.
 - Bad: "We used Next.js."
 - Good: "To reduce SEO acquisition costs, we migrated SPA to Next.js SSR."
@@ -75,10 +78,12 @@ Rule #3: Context is King
 ### Language Filter
 
 Ban list (avoid in Chinese output):
+
 - 虚词：负责、参与、协助、配合、学习了、了解、熟悉
 - 大词：全链路、中台化、赋能、抓手、闭环（除非确有其事）
 
 Whitelist verbs (prefer in Chinese output):
+
 - 建设类：搭建、重构、设计、主导、从 0 到 1
 - 优化类：缩减、提升、降低、对齐、迁移
 - 保障类：监控、兜底、回滚、覆盖、容灾
@@ -100,6 +105,7 @@ Whitelist verbs (prefer in Chinese output):
 ## Workflow
 
 1. Intake inputs.
+
    - Ask for the project design document (file path, version/date, and key sections to cite).
    - Ask for project name, business background, target users, scope, timeline, success metrics.
    - Ask for architecture details, data flow, deployment topology, tech stack choices.
@@ -112,11 +118,13 @@ Whitelist verbs (prefer in Chinese output):
    - Ask for evidence anchors: key design doc names/paths/sections and metric sources; keep code paths as internal notes if provided.
 
 2. Confirm scope and audience.
+
    - Confirm whether a full whitepaper is required or a subset of sections.
    - If not specified, assume a full dossier for personal interview preparation only.
    - Confirm tone constraints only if the user wants a non-personal audience.
 
 3. Draft the whitepaper in the required order.
+
    - Audience & Usage: state it is a personal interview-prep dossier unless otherwise specified.
    - Big Picture: one-sentence business background, textual architecture description, textual tech-choice comparisons.
    - Design Doc Anchors: cite the design document sections and summarize their key points in text.
@@ -141,22 +149,26 @@ Whitelist verbs (prefer in Chinese output):
 # <项目名称> 复盘档案
 
 ## 0. 受众与用途
+
 - 受众：
 - 用途：
 - 叙述人称：
 
 ## 1. 全景（Situation & Task）
+
 - 业务背景：
 - 架构描述（文字，包含组件关系与数据流）：
 - 技术选型对比（文字）：
 - 证据锚点（设计文档名称 + 路径 + 章节，或指标来源，1-3 条）：
 
 ## 2. 设计文档引用与要点（必须）
+
 - 设计文档名称/版本：
 - 设计文档路径（关键条目即可）：
 - 关键章节引用（章节标题 + 关联要点）：
 
 ## 3. 核心功能与实现（Action - Construction）
+
 - 功能 1：
 - 功能 2：
 - 功能 3（可选）：
@@ -166,11 +178,13 @@ Whitelist verbs (prefer in Chinese output):
 - 证据锚点（设计文档名称 + 路径 + 章节，或指标来源，1-3 条）：
 
 ## 4. 个人执行与成果（Action & Result）
+
 - 执行范围与边界：
 - 关键决策与执行：
 - 量化结果与证据锚点（指标来源/文档名称+路径+章节，1-3 条）：
 
 ## 5. 深挖案例（Action - Optimization & Result）
+
 - 现象：
 - 排查过程：
 - 方案 V1（失败）：
@@ -179,21 +193,25 @@ Whitelist verbs (prefer in Chinese output):
 - 量化结果：
 
 ## 6. 过程记录（可选）
+
 - 关键里程碑：
 - 重要权衡与取舍：
 - 交付节奏或流程改进：
 
 ## 7. 事故复盘（可选）
+
 - 时间线：
 - 根因：
 - 行动项：
 
 ## 8. 知识库（Legacy）
+
 - 片段 1（文字说明）：
 - 片段 2（文字说明）：
 - 注意事项：
 
 ## 9. 质量协议清单
+
 - [ ] 证据锚点检查（每节 1-3 条，避免长列表）
 - [ ] 文字化检查（无代码块/图表/表格）
 - [ ] 逻辑检查（技术选择与业务关联）
