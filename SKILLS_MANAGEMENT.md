@@ -67,8 +67,9 @@ stow -d "$repo_root" -t "$target_dir" --ignore='\\.DS_Store$' skills
 ## 新增技能入库（手动脚本）
 新增 skill 后，推荐用入库脚本将本地真实目录迁移到 Git 仓库并重新 stow。
 
-脚本路径：
-`~/.codex/bin/codex-skill-adopt`
+脚本路径（推荐放在仓库并软链接到本机）：
+- 仓库：`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/scripts/codex-skill-adopt`
+- 本机：`~/.codex/bin/codex-skill-adopt`
 
 用法：
 ```bash
