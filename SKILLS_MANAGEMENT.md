@@ -3,11 +3,43 @@
 ## 目标
 - 使用 Git 仓库作为唯一源（source of truth）
 - 使用 GNU Stow 在 `~/.codex/skills` 下建立目录级软链接
+- Windows 端使用目录 Junction（避免 symlink 权限问题）
 - `.system` 保持本地，不纳入 Git 管理
 
 ## 目录约定
-- 仓库技能目录：`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/skills`
+- 仓库技能目录：`<repo_root>/skills`
+  - macOS 示例：`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/skills`
+  - Windows 示例：`D:\codes\agent-skills\skills`
 - Codex 读取目录：`~/.codex/skills`
+  - Windows 示例：`C:\Users\<user>\.codex\skills`
+
+## 脚本清单（已外置）
+- Windows 一键更新：`scripts/codex-skills-sync.ps1`
+- macOS / Linux 初始化接管：`scripts/codex-skills-bootstrap.sh`
+- macOS / Linux 刷新链接：`scripts/codex-skills-stow.sh`
+- macOS / Linux 入库迁移：`scripts/codex-skill-adopt`
+
+## Windows 端管理（Junction 方式）
+> 适用于 Windows。使用目录 Junction，不依赖 stow，且不需要管理员权限。
+
+### 初始化/一键更新
+```powershell
+# 仓库根目录为当前目录时
+powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1
+
+# 指定仓库根目录
+powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1 -RepoRoot D:\codes\agent-skills
+
+# 清理仓库里已不存在的链接（可选）
+powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1 -Prune
+```
+
+### Git 仓库更新后如何同步到用户目录
+- 直接执行 `scripts/codex-skills-sync.ps1`（默认包含 `git pull`）。
+- 已有技能目录内的文件变更：**立即生效**（Junction 指向仓库目录）。
+- 新增技能目录：脚本会自动补齐链接。
+- 删除/重命名技能目录：使用 `-Prune` 清理旧链接。
+- `.system` 始终保留在 `~/.codex/skills/.system`，不参与 Git 同步。
 
 ## 同步行为说明（双向）
 ### Git 仓库 -> Codex
@@ -35,40 +67,23 @@ stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills
 
 > `.system` 始终保持本地，不参与 Git 同步。
 
-## 安装依赖
+## macOS / Linux 安装依赖
 ```bash
 brew install stow
 ```
 
-## 初始化同步（现有技能接管）
+## macOS / Linux 初始化同步（现有技能接管）
 建议先备份现有目录，再用 stow 接管。
 
 ```bash
-repo_root="/Users/hidetoshidekisugi/Documents/suneo-agent-skills"
-repo_dir="${repo_root}/skills"
-target_dir="${HOME}/.codex/skills"
-backup_dir="${target_dir}.backup-$(date +%Y%m%d-%H%M%S)"
-
-mkdir -p "$backup_dir"
-
-# 仅移走与仓库同名的技能目录（避免影响 .system）
-for d in "$repo_dir"/*; do
-  [ -d "$d" ] || continue
-  name="$(basename "$d")"
-  if [ -e "$target_dir/$name" ] || [ -L "$target_dir/$name" ]; then
-    mv "$target_dir/$name" "$backup_dir/"
-  fi
-done
-
-# 用 skills 包统一 stow，避免扁平化链接
-stow -d "$repo_root" -t "$target_dir" --ignore='\\.DS_Store$' skills
+bash scripts/codex-skills-bootstrap.sh
 ```
 
-## 新增技能入库（手动脚本）
+## macOS / Linux 新增技能入库（手动脚本）
 新增 skill 后，推荐用入库脚本将本地真实目录迁移到 Git 仓库并重新 stow。
 
 脚本路径（推荐放在仓库并软链接到本机）：
-- 仓库：`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/scripts/codex-skill-adopt`
+- 仓库：`<repo_root>/scripts/codex-skill-adopt`
 - 本机：`~/.codex/bin/codex-skill-adopt`
 
 用法：
@@ -91,16 +106,16 @@ codex-skill-adopt project-whitepaper
 export PATH=\"$HOME/.codex/bin:$PATH\"
 ```
 
-## 脚本位置建议（多机同步）
+## macOS / Linux 脚本位置建议（多机同步）
 为了两台电脑同步一致，**建议把脚本放进 Git 仓库并在本机软链接到 `~/.codex/bin`**：
 
 建议仓库路径：
-`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/scripts/codex-skill-adopt`
+`<repo_root>/scripts/codex-skill-adopt`
 
 本机链接：
 ```bash
 mkdir -p ~/.codex/bin
-ln -s /Users/hidetoshidekisugi/Documents/suneo-agent-skills/scripts/codex-skill-adopt ~/.codex/bin/codex-skill-adopt
+ln -s <repo_root>/scripts/codex-skill-adopt ~/.codex/bin/codex-skill-adopt
 ```
 
 这样脚本改动也能跟随仓库同步到另一台电脑。
@@ -108,7 +123,7 @@ ln -s /Users/hidetoshidekisugi/Documents/suneo-agent-skills/scripts/codex-skill-
 ## 注意事项
 - **不要用 stow 单独 stow 某个技能目录**（例如直接 stow `code-review-report`），这会导致目录扁平化。
 - 推荐统一使用 `skills` 作为 package：
-  `stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills skills`
+  `stow -d <repo_root> -t ~/.codex/skills skills`
 - `.system` 永远留在本地，避免版本冲突或被 Codex 更新覆盖。
 - macOS 下建议忽略 `.DS_Store`，避免 stow 冲突：
   `stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills -R --ignore='\\.DS_Store$' skills`

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="/Users/hidetoshidekisugi/Documents/suneo-agent-skills"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "$script_dir/.." && pwd)"
 repo_dir="${repo_root}/skills"
 target_dir="${HOME}/.codex/skills"
 
