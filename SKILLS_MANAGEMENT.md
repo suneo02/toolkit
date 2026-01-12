@@ -1,129 +1,99 @@
-# Codex Skills 管理方案
+# Skills 管理方案
 
 ## 目标
 - 使用 Git 仓库作为唯一源（source of truth）
-- 使用 GNU Stow 在 `~/.codex/skills` 下建立目录级软链接
+- 使用 GNU Stow 在 `~/.codex/skills` (Codex) 和 `~/.gemini/skills` (Gemini) 下建立目录级软链接
 - Windows 端使用目录 Junction（避免 symlink 权限问题）
 - `.system` 保持本地，不纳入 Git 管理
+- **支持多 Agent (Codex / Gemini)**：脚本逻辑已复用，分别提供 wrapper 脚本
 
 ## 目录约定
 - 仓库技能目录：`<repo_root>/skills`
   - macOS 示例：`/Users/hidetoshidekisugi/Documents/suneo-agent-skills/skills`
   - Windows 示例：`D:\codes\agent-skills\skills`
-- Codex 读取目录：`~/.codex/skills`
-  - Windows 示例：`C:\Users\<user>\.codex\skills`
+- 读取目录：
+  - Codex: `~/.codex/skills`
+  - Gemini: `~/.gemini/skills`
 
-## 脚本清单（已外置）
+## 脚本清单
+所有核心逻辑位于 `scripts/core/`，对外提供特定 Agent 的 Wrapper 脚本。
+
+### Codex Scripts
 - Windows 一键更新：`scripts/codex-skills-sync.ps1`
 - macOS / Linux 初始化接管：`scripts/codex-skills-bootstrap.sh`
 - macOS / Linux 刷新链接：`scripts/codex-skills-stow.sh`
 - macOS / Linux 入库迁移：`scripts/codex-skill-adopt`
 
+### Gemini Scripts
+- Windows 一键更新：`scripts/gemini-skills-sync.ps1`
+- macOS / Linux 初始化接管：`scripts/gemini-skills-bootstrap.sh`
+- macOS / Linux 刷新链接：`scripts/gemini-skills-stow.sh`
+- macOS / Linux 入库迁移：`scripts/gemini-skill-adopt`
+
 ## Windows 端管理（Junction 方式）
 > 适用于 Windows。使用目录 Junction，不依赖 stow，且不需要管理员权限。
 
 ### 初始化/一键更新
+请根据目标 Agent 选择脚本：
 ```powershell
-# 仓库根目录为当前目录时
+# Codex
 powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1
 
-# 指定仓库根目录
-powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1 -RepoRoot D:\codes\agent-skills
-
-# 清理仓库里已不存在的链接（可选）
-powershell -ExecutionPolicy Bypass -File scripts\codex-skills-sync.ps1 -Prune
+# Gemini
+powershell -ExecutionPolicy Bypass -File scripts\gemini-skills-sync.ps1
 ```
 
-### Git 仓库更新后如何同步到用户目录
-- 直接执行 `scripts/codex-skills-sync.ps1`（默认包含 `git pull`）。
-- 已有技能目录内的文件变更：**立即生效**（Junction 指向仓库目录）。
-- 新增技能目录：脚本会自动补齐链接。
-- 删除/重命名技能目录：使用 `-Prune` 清理旧链接。
-- `.system` 始终保留在 `~/.codex/skills/.system`，不参与 Git 同步。
+支持参数：
+- `-RepoRoot <path>`: 指定仓库路径
+- `-Prune`: 清理仓库里已不存在的链接
 
-## 同步行为说明（双向）
-### Git 仓库 -> Codex
-- 修改/新增文件（在已有技能目录内）：**立即生效**，因为 Codex 访问的是软链接目录
-- 新增技能目录（如 `skills/new-skill/`）：**需要执行一次 stow** 才会创建新软链接
-- 删除技能目录：**需要执行一次 stow -R** 才会清理旧软链接（否则会留下断链）
+## macOS / Linux 管理
 
-推荐命令：
-```bash
-stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills -R skills
-```
-
-如果遇到 `.DS_Store` 冲突（常见于 macOS），请用忽略参数：
-```bash
-stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills -R --ignore='\\.DS_Store$' skills
-```
-
-### Codex -> Git 仓库
-- 修改/新增文件（在已 stow 的技能目录内）：**立即同步到仓库**
-- 删除文件（在已 stow 的技能目录内）：**立即同步到仓库**
-- 新增技能目录（在 `~/.codex/skills` 新建一个真实目录）：**不会自动入库**  
-  需要用 `codex-skill-adopt` 迁移并重新 stow
-- 删除技能目录（直接删 `~/.codex/skills/<skill>` 软链接）：**只会删链接**，仓库不变  
-  正确做法是在仓库中删除目录，然后 `stow -R`
-
-> `.system` 始终保持本地，不参与 Git 同步。
-
-## macOS / Linux 安装依赖
+### 1. 安装依赖
 ```bash
 brew install stow
 ```
 
-## macOS / Linux 初始化同步（现有技能接管）
-建议先备份现有目录，再用 stow 接管。
+### 2. 初始化同步（现有技能接管）
+建议先备份现有目录，再用脚本接管。
 
+Codex:
 ```bash
-bash scripts/codex-skills-bootstrap.sh
+./scripts/codex-skills-bootstrap.sh
 ```
 
-## macOS / Linux 新增技能入库（手动脚本）
-新增 skill 后，推荐用入库脚本将本地真实目录迁移到 Git 仓库并重新 stow。
-
-脚本路径（推荐放在仓库并软链接到本机）：
-- 仓库：`<repo_root>/scripts/codex-skill-adopt`
-- 本机：`~/.codex/bin/codex-skill-adopt`
-
-用法：
+Gemini:
 ```bash
-# 扫描并入库所有“真实目录”（排除 .system、已 stow 的目录、非目录文件）
-codex-skill-adopt
-
-# 仅入库指定 skill
-codex-skill-adopt project-whitepaper
+./scripts/gemini-skills-bootstrap.sh
 ```
 
-脚本行为：
-- 仅处理“真实目录”，不会触碰 `.system`
-- 已经是 symlink 的目录会被跳过
-- 非目录文件（如 `*.skill`）会被跳过
-- 入库后自动执行 `stow`，确保 `~/.codex/skills` 保持软链接状态
+### 3. 日常同步 (Stow)
+当仓库有新增目录时，或者需要刷新链接：
 
-如果 `codex-skill-adopt` 不在 PATH，可在 `~/.zshrc` 里加入：
+Codex:
 ```bash
-export PATH=\"$HOME/.codex/bin:$PATH\"
+./scripts/codex-skills-stow.sh
 ```
 
-## macOS / Linux 脚本位置建议（多机同步）
-为了两台电脑同步一致，**建议把脚本放进 Git 仓库并在本机软链接到 `~/.codex/bin`**：
-
-建议仓库路径：
-`<repo_root>/scripts/codex-skill-adopt`
-
-本机链接：
+Gemini:
 ```bash
-mkdir -p ~/.codex/bin
-ln -s <repo_root>/scripts/codex-skill-adopt ~/.codex/bin/codex-skill-adopt
+./scripts/gemini-skills-stow.sh
 ```
 
-这样脚本改动也能跟随仓库同步到另一台电脑。
+### 4. 新增技能入库 (Adopt)
+新增 skill 后，将本地真实目录迁移到 Git 仓库并重新 stow。
 
-## 注意事项
-- **不要用 stow 单独 stow 某个技能目录**（例如直接 stow `code-review-report`），这会导致目录扁平化。
-- 推荐统一使用 `skills` 作为 package：
-  `stow -d <repo_root> -t ~/.codex/skills skills`
-- `.system` 永远留在本地，避免版本冲突或被 Codex 更新覆盖。
-- macOS 下建议忽略 `.DS_Store`，避免 stow 冲突：
-  `stow -d /Users/hidetoshidekisugi/Documents/suneo-agent-skills -t ~/.codex/skills -R --ignore='\\.DS_Store$' skills`
+Codex:
+```bash
+./scripts/codex-skill-adopt [skill-name]
+```
+
+Gemini:
+```bash
+./scripts/gemini-skill-adopt [skill-name]
+```
+
+## 脚本逻辑复用说明
+- `scripts/core/` 包含通用逻辑（bootstrap, stow, adopt, sync）。
+- `scripts/codex-*` 和 `scripts/gemini-*` 仅设置环境变量（如 `TARGET_AGENT`）并调用 core 脚本。
+- 如需修改逻辑，请编辑 `scripts/core/` 下的对应文件。
