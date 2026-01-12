@@ -25,38 +25,15 @@ Generates and maintains conversation and project archives in Chinese, following 
 
 ---
 
-### 2. **Project Experience Baseline** (`project-experience-baseline/`)
+### 2. **Interview Project Resume** (`interview-project-resume/`)
 
-Validates and routes project experience content across different document formats, ensuring truthfulness and quality compliance.
-
-**Use cases:**
-
-- Audit project experience content for quality and accuracy
-- Route requests to appropriate document types (whitepaper/resume/manuscript)
-- Validate technical claims against evidence
-- Enforce baseline language standards and remove filler words
-- Apply STAR-Plus framework compliance checks
-
-**Key features:**
-
-- Decision flow for content routing
-- Comprehensive audit workflow
-- Evidence traceability enforcement
-- Language filter (action verbs, banned filler words)
-- STAR-Plus signal validation
-- Leveling matrix alignment for different target levels
-
----
-
-### 3. **Project Experience Resume** (`project-experience-resume/`)
-
-Creates high-density, ATS-safe resume entries for project experience using STAR-L compression.
+Creates interview-focused, ATS-safe project experience resume entries using STAR-L compression.
 
 **Use cases:**
 
-- Draft or rewrite project experience sections for resumes
+- Draft or rewrite project experience sections for interview resumes
 - Convert whitepapers, code, and notes into 1-line summary + 3-4 bullets
-- Optimize resume bullets for signal-to-noise ratio
+- Optimize resume bullets for signal-to-noise ratio and evidence clarity
 - Compress technical achievements into recruitment-friendly format
 
 **Key features:**
@@ -64,16 +41,16 @@ Creates high-density, ATS-safe resume entries for project experience using STAR-
 - STAR-L (Lite) compression format
 - High-density bullet construction
 - Scale metrics integration (PV/UV/orders/concurrency)
-- Tech stack highlighting
+- Tech stack highlighting with evidence anchors
 - Quantified results emphasis
 - ATS-safe punctuation and formatting
 - Quality gates for completeness and accuracy
 
 ---
 
-### 4. **Project Experience Manuscript** (`project-experience-manuscript/`)
+### 3. **Interview Project Script** (`interview-project-script/`)
 
-Creates interview-ready project experience narratives with defensive Q&A and deep-dive explanations.
+Creates interview-ready project experience scripts with defensive Q&A and deep-dive explanations.
 
 **Use cases:**
 
@@ -94,7 +71,7 @@ Creates interview-ready project experience narratives with defensive Q&A and dee
 
 ---
 
-### 5. **Project Whitepaper** (`project-whitepaper/`)
+### 4. **Project Whitepaper** (`project-whitepaper/`)
 
 Generates comprehensive technical whitepapers documenting full project architecture, decisions, and implementations.
 
@@ -120,7 +97,7 @@ Generates comprehensive technical whitepapers documenting full project architect
 
 ---
 
-### 6. **Spec Doc Writer** (`spec-doc-writer/`)
+### 5. **Spec Doc Writer** (`spec-doc-writer/`)
 
 Structures and maintains specification documents following repository conventions with implementation planning and status tracking.
 
@@ -151,16 +128,14 @@ These skills work together to create a complete project experience documentation
 ```
 Input (Code/Notes/Conversations)
     ↓
-Project Experience Baseline (Routing & Validation)
-    ↓
-┌───────────────┬──────────────────┬──────────────────┐
-│               │                  │                  │
-↓               ↓                  ↓                  ↓
-Whitepaper  Resume           Manuscript        Spec Doc
-(Technical  (Compressed      (Interview       (Task
- Deep-dive) Bullets)         Narratives)      Documentation)
-│               │                  │                  │
-└───────────────┴──────────────────┴──────────────────┘
+┌───────────────┬────────────────────┬──────────────────┬───────────┐
+│               │                    │                  │           │
+↓               ↓                    ↓                  ↓           ↓
+Whitepaper  Interview Resume   Interview Script     Spec Doc
+(Technical  (Compressed         (Oral Script +       (Task
+ Deep-dive) Bullets)            Defensive Q&A)       Documentation)
+│               │                    │                  │
+└───────────────┴────────────────────┴──────────────────┘
     ↓
 Doc Archive (Historical Record)
 ```
@@ -175,20 +150,16 @@ skills/
 │   │   └── archive-templates.md
 │   └── scripts/             # Git history query utility
 │       └── git_history_query.py
-├── project-experience-baseline/
+├── interview-project-resume/
 │   ├── SKILL.md
 │   └── references/
-│       └── project-experience-baseline.md
-├── project-experience-manuscript/
+│       ├── baseline.md
+│       └── resume-bullets.md
+├── interview-project-script/
 │   ├── SKILL.md
 │   └── references/
-│       ├── project-experience-baseline.md
-│       └── project-experience-manuscript.md
-├── project-experience-resume/
-│   ├── SKILL.md
-│   └── references/
-│       ├── project-experience-baseline.md
-│       └── project-experience-resume.md
+│       ├── baseline.md
+│       └── script.md
 ├── project-whitepaper/
 │   ├── SKILL.md
 │   └── references/
@@ -215,7 +186,7 @@ skills/
 - **Evidence-Based**: All technical claims must be traceable to sources
 - **Comprehensive**: Supports full documentation lifecycle from raw notes to interview narratives
 - **Modular**: Each skill solves a specific documentation problem
-- **Reusable**: Skills build on shared baselines (project-experience-baseline)
+- **Reusable**: Skills embed a shared interview baseline for consistency
 - **Structured**: Templates and checklists ensure consistency
 - **Bilingual**: English documentation with Chinese skill descriptions
 

@@ -1,14 +1,14 @@
 ---
-name: project-experience-resume
-description: Create or rewrite project experience entries in resume format with STAR-L compression, high-density bullets, and baseline compliance. Use when asked to draft, compress, or optimize project experience sections for a resume, convert whitepapers/code/notes into 1-line summary + 3-4 bullet points, or audit resume bullets for signal-to-noise.
+name: interview-project-resume
+description: Create or rewrite interview-focused project experience resume entries in Chinese using STAR-L compression, high-density bullets, and evidence-backed baseline rules. Use when asked to draft or optimize resume project bullets, convert notes/whitepapers into a 1-line summary + 3-4 bullets, or audit project experience bullets for interview readiness.
 ---
 
-# Resume Project Experience
+# Interview Project Resume
 
 ## Quick Start
 
-- Read `references/project-experience-resume.md` for formatting and compression rules.
-- Read `references/project-experience-baseline.md` for truthfulness and language filters.
+- Read `references/resume-bullets.md` for formatting and compression rules.
+- Read `references/baseline.md` for truthfulness and language filters.
 - Collect the required inputs, then generate output using the template and quality gates below.
 
 ## Inputs Checklist
@@ -19,11 +19,12 @@ description: Create or rewrite project experience entries in resume format with 
 - Key actions taken and technical methods applied
 - Quantified results (ms/%, MB, QPS) or qualitative proxies when metrics are unavailable
 - Legacy assets (components, docs, standards) if relevant
-- Evidence pointers (code, docs, commits) for each technical claim
+- Evidence anchors (design docs, PRs/commits, dashboards) for each technical claim
+- Target level (P5/P6/P7) if applicable
 
 ## Workflow
 
-1. Extract signals: scale, actions, tech keywords, metrics, and legacy.
+1. Extract signals and evidence anchors: scale, actions, tech keywords, metrics, and legacy.
 2. Construct bullets with STAR-L (Lite): `[action] + [technical object] + [method] + [metric/result]`.
 3. Render header and one-line summary, then produce 3-4 bullets ordered by impact.
 4. Run density checks and revise until all compliance gates pass.

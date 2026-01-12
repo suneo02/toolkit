@@ -1,14 +1,14 @@
 ---
-name: project-experience-manuscript
-description: Create interview-ready project experience manuscripts with narrative structure, STAR-Plus expansion, and defensive Q&A. Use when asked to draft oral scripts, deep-dive explanations, or interview prep from resume bullets or whitepapers.
+name: interview-project-script
+description: Create interview-ready project experience scripts in Chinese with narrative structure, STAR-Plus expansion, and defensive Q&A. Use when asked to draft 60-second hooks, deep-dive explanations, mock interview prompts, or convert resume bullets/whitepapers into oral scripts.
 ---
 
-# Project Experience Manuscript
+# Interview Project Script
 
 ## Quick Start
 
-- Read `references/project-experience-manuscript.md` for narrative structure and Q&A strategy.
-- Read `references/project-experience-baseline.md` to enforce truthfulness and language rules.
+- Read `references/script.md` for narrative structure and Q&A strategy.
+- Read `references/baseline.md` to enforce truthfulness and language rules.
 
 ## Inputs Checklist
 
@@ -17,6 +17,8 @@ description: Create interview-ready project experience manuscripts with narrativ
 - Key pain points, constraints, decisions, and trade-offs
 - Metrics or qualitative results
 - Legacy assets (docs, standards, components)
+- Evidence anchors (design docs, PRs/commits, dashboards) for key claims
+- Target level (P5/P6/P7) if applicable
 
 ## Workflow
 
@@ -36,7 +38,7 @@ Provide:
 
 ## Language Requirements
 
-- All manuscript content must be written in Chinese.
+- All script content must be written in Chinese.
 
 ## Guardrails
 
