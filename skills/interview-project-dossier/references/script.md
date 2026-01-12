@@ -1,9 +1,26 @@
-# 格式二：面试口述脚本 (Interview Script)
+# 口述脚本模式 (Interview Script)
 
 - **定位**：面试口述脚本 & 答辩思维导图。
 - **目标读者**：面试官 (深度追问)、自己 (临场记忆)。
-- **前置要求**：本脚本基于 [面试基线](./baseline.md) 的 **STAR-Plus 标准** 进行口语化扩充。
+- **前置要求**：阅读 `references/baseline.md` 并遵守 **STAR-Plus 标准**，用于口语化扩充。
 - **AI 生成指令**：作为“编剧”与“辩论教练”，将冷冰冰的技术点转化为有血有肉的“英雄之旅”故事，并构建防御工事。
+
+## Inputs Checklist
+
+- Resume bullets or dossier draft
+- Business context, target users, core metrics
+- Key pain points, constraints, decisions, and trade-offs
+- Evidence anchors (design docs, PRs/commits, dashboards)
+- Target interview focus areas (trade-off, fundamentals, reflection)
+- Target level (P5/P6/P7) if applicable
+
+## Workflow
+
+1. Draft the hook using the formula below.
+2. Expand STAR-Plus with decisions, constraints, and obstacles.
+3. Generate defensive Q&A: trade-off, fundamentals, reflection.
+4. Simulate three rounds of interviewer prompts.
+5. Validate with baseline rules: metrics, evidence anchors, first-person, no code blocks.
 
 ## 1. 叙事构建逻辑 (Narrative Construction)
 
@@ -65,3 +82,10 @@
 1.  **Round 1 (基础)**：考察 API 熟练度。
 2.  **Round 2 (场景)**：修改业务条件（“如果数据量大 10 倍怎么办？”）。
 3.  **Round 3 (底层)**：考察源码理解（“Vue 的 diff 算法在这里是怎么运作的？”）。
+
+## Output Format
+
+- Hook (1 minute)
+- STAR-Plus deep dive (S/T/A/R/L sections)
+- Defensive Q&A set (trade-off, fundamentals, reflection)
+- Three-round mock interview prompts

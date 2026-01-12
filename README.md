@@ -25,7 +25,26 @@ Generates and maintains conversation and project archives in Chinese, following 
 
 ---
 
-### 2. **Interview Project Resume** (`interview-project-resume/`)
+### 2. **Interview Project Dossier** (`interview-project-dossier/`)
+
+Creates interview-focused project dossiers (whitepaper) and oral scripts with evidence anchors.
+
+**Use cases:**
+
+- Analyze a project with end-to-end design and personal contributions
+- Produce a full interview dossier/whitepaper citing design docs
+- Generate 60-second hooks, STAR-Plus deep dives, defensive Q&A, and mock prompts
+
+**Key features:**
+
+- Text-only dossier template (first-person, evidence anchors)
+- STAR-Plus structure with trade-offs and metrics
+- Script mode for oral hooks + defensive Q&A
+- Baseline compliance (truthfulness, language filter, leveling guidance)
+
+---
+
+### 3. **Interview Project Resume** (`interview-project-resume/`)
 
 Creates interview-focused, ATS-safe project experience resume entries using STAR-L compression.
 
@@ -45,29 +64,6 @@ Creates interview-focused, ATS-safe project experience resume entries using STAR
 - Quantified results emphasis
 - ATS-safe punctuation and formatting
 - Quality gates for completeness and accuracy
-
----
-
-### 3. **Interview Project Script** (`interview-project-script/`)
-
-Creates interview-ready project experience scripts with defensive Q&A and deep-dive explanations.
-
-**Use cases:**
-
-- Draft oral scripts for technical interviews
-- Create 60-second hooks and deep-dive narratives
-- Prepare defensive Q&A for technical challenges
-- Generate interview prep materials from resume bullets or whitepapers
-- Structure STAR-Plus narratives with trade-off analysis
-
-**Key features:**
-
-- 60-second hook structure
-- STAR-Plus deep-dive expansion
-- Defensive Q&A preparation (trade-offs, fundamentals, reflection)
-- Mock interview simulation (3-round)
-- Business impact tie-in for every technical detail
-- Interview-friendly language refinement
 
 ---
 
@@ -128,14 +124,14 @@ These skills work together to create a complete project experience documentation
 ```
 Input (Code/Notes/Conversations)
     ↓
-┌───────────────┬────────────────────┬──────────────────┬───────────┐
-│               │                    │                  │           │
-↓               ↓                    ↓                  ↓           ↓
-Whitepaper  Interview Resume   Interview Script     Spec Doc
-(Technical  (Compressed         (Oral Script +       (Task
- Deep-dive) Bullets)            Defensive Q&A)       Documentation)
-│               │                    │                  │
-└───────────────┴────────────────────┴──────────────────┘
+┌──────────────────┬────────────────────┬───────────┐
+│                  │                    │           │
+↓                  ↓                    ↓           ↓
+Interview Dossier  Interview Resume     Spec Doc
+(Whitepaper +      (Compressed          (Task
+ Script)           Bullets)             Documentation)
+│                  │                    │
+└──────────────────┴────────────────────┴───────────┘
     ↓
 Doc Archive (Historical Record)
 ```
@@ -150,16 +146,18 @@ skills/
 │   │   └── archive-templates.md
 │   └── scripts/             # Git history query utility
 │       └── git_history_query.py
+├── interview-project-dossier/
+│   ├── SKILL.md
+│   └── references/
+│       ├── baseline.md
+│       ├── dossier-guide.md
+│       ├── dossier-template.md
+│       └── script.md
 ├── interview-project-resume/
 │   ├── SKILL.md
 │   └── references/
 │       ├── baseline.md
 │       └── resume-bullets.md
-├── interview-project-script/
-│   ├── SKILL.md
-│   └── references/
-│       ├── baseline.md
-│       └── script.md
 ├── project-whitepaper/
 │   ├── SKILL.md
 │   └── references/
