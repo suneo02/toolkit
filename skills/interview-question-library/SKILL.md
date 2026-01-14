@@ -27,6 +27,17 @@ Use this skill to maintain interview question content in the knowledge base whil
 - Keep file and directory names in `kebab-case`.
 - Use relative paths for internal links.
 
+## Maintenance Checklist
+
+- Ensure a single H1 per document.
+- Ensure each directory has `README.md` or `index.md`.
+- Ensure internal links are relative and resolvable.
+- Split documents only when exceeding ~1000 lines with multiple subtopics.
+
+## Scripts
+
+- Run `python3 /Users/hidetoshidekisugi/Documents/suneo-agent-skills/skills/interview-question-library/scripts/audit_interview_library.py --root library [paths...]` to audit naming, indexes, H1 count, relative links, and length.
+
 ## References
 
 - `references/interview-question-writing.md`
