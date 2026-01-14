@@ -9,8 +9,27 @@ fi
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # core is inside scripts, so go up two levels to get to repo root
 repo_root="$(cd "$script_dir/../.." && pwd)"
-repo_dir="${repo_root}/skills"
 target_dir="${HOME}/.${TARGET_AGENT}/skills"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -t|--target-dir)
+      target_dir="$2"
+      shift 2
+      ;;
+    -r|--repo-root)
+      repo_root="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+repo_dir="${repo_root}/skills"
 backup_dir="${target_dir}.backup-$(date +%Y%m%d-%H%M%S)"
 
 echo "Bootstrapping ${TARGET_AGENT} skills..."

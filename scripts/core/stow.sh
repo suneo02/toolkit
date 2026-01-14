@@ -10,6 +10,24 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
 target_dir="${HOME}/.${TARGET_AGENT}/skills"
 
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -t|--target-dir)
+      target_dir="$2"
+      shift 2
+      ;;
+    -r|--repo-root)
+      repo_root="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
 echo "Stowing ${TARGET_AGENT} skills..."
 
 if ! command -v stow >/dev/null 2>&1; then

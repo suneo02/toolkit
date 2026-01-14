@@ -8,8 +8,33 @@ fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
-repo_dir="${repo_root}/skills"
 target_dir="${HOME}/.${TARGET_AGENT}/skills"
+
+SKILLS=()
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -t|--target-dir)
+      target_dir="$2"
+      shift 2
+      ;;
+    -r|--repo-root)
+      repo_root="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      SKILLS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+repo_dir="${repo_root}/skills"
 
 echo "Adopting skills for ${TARGET_AGENT}..."
 
@@ -62,8 +87,8 @@ adopt_one() {
   mv "$src" "$dst"
 }
 
-if [ "$#" -gt 0 ]; then
-  for name in "$@"; do
+if [ "${#SKILLS[@]}" -gt 0 ]; then
+  for name in "${SKILLS[@]}"; do
     adopt_one "$name"
   done
 else
