@@ -4,17 +4,21 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+function toNumber(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
 function parseArgs(argv) {
   const args = {
     base: 'main',
     head: 'HEAD',
-    out: '',
-    diffDir: '',
     repo: process.cwd(),
-    findRenames: '',
-    findCopies: '',
-    jsonOut: '',
+    out: '',
+    outDir: '',
     maxFileDiffLines: 0,
+    context: 3,
+    help: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -30,38 +34,28 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
-    if (key === '--out') {
-      args.out = value;
-      i += 1;
-      continue;
-    }
-    if (key === '--diff-dir') {
-      args.diffDir = value;
-      i += 1;
-      continue;
-    }
     if (key === '--repo') {
       args.repo = value;
       i += 1;
       continue;
     }
-    if (key === '--find-renames') {
-      args.findRenames = value || '1';
+    if (key === '--out') {
+      args.out = value;
       i += 1;
       continue;
     }
-    if (key === '--find-copies') {
-      args.findCopies = value || '1';
-      i += 1;
-      continue;
-    }
-    if (key === '--json-out') {
-      args.jsonOut = value || '';
+    if (key === '--out-dir') {
+      args.outDir = value;
       i += 1;
       continue;
     }
     if (key === '--max-file-diff-lines') {
-      args.maxFileDiffLines = Number(value || '0') || 0;
+      args.maxFileDiffLines = toNumber(value, 0);
+      i += 1;
+      continue;
+    }
+    if (key === '--context') {
+      args.context = toNumber(value, 3);
       i += 1;
       continue;
     }
@@ -115,11 +109,48 @@ function formatNameStatus(nameStatus) {
     });
 }
 
+function buildPathStats(numStatRaw) {
+  const stats = {};
+  if (!numStatRaw) return stats;
+  numStatRaw
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .forEach((line) => {
+      const parts = line.split('\t');
+      const add = parts[0];
+      const del = parts[1];
+      const pathPart = parts.slice(2).join('\t');
+      let targetPath = pathPart;
+      const arrowIdx = pathPart.indexOf(' -> ');
+      if (arrowIdx >= 0) {
+        targetPath = pathPart.slice(arrowIdx + 4);
+      }
+      stats[targetPath] = {
+        added: add === '-' ? null : Number(add || 0),
+        deleted: del === '-' ? null : Number(del || 0),
+        isBinary: add === '-' || del === '-',
+      };
+    });
+  return stats;
+}
+
+function limitLines(text, maxLines) {
+  if (!maxLines || maxLines <= 0) {
+    return { content: text, truncated: false };
+  }
+  const lines = text.split('\n');
+  if (lines.length <= maxLines) {
+    return { content: text, truncated: false };
+  }
+  return { content: lines.slice(0, maxLines).join('\n'), truncated: true };
+}
+
 function usage() {
   return [
-    'Usage: generate-diff-report.js [--base <ref>] [--head <ref>] [--repo <path>] [--out <file>] [--diff-dir <dir>]',
-    'Options: [--find-renames <N>] [--find-copies <N>] [--json-out <file>] [--max-file-diff-lines <N>] [--include <regex[,regex...]>] [--exclude <regex[,regex...]>]',
-    'Defaults: --base main --head HEAD --repo CWD; diff files disabled unless --diff-dir is set',
+    'Usage: generate-diff-report.js [--base <ref>] [--head <ref>] [--repo <path>] [--out <file>]',
+    'Options: [--out-dir <dir>] [--max-file-diff-lines <N>] [--context <N>]',
+    'Defaults: --base main --head HEAD --context 3; writes to <repo>/diff-report/ unless --out is set',
   ].join('\n');
 }
 
@@ -131,164 +162,115 @@ function main() {
   }
 
   const repo = path.resolve(args.repo);
+  const defaultOutDir = path.join(repo, 'diff-report');
+  const outDir = args.out ? '' : path.resolve(args.outDir || defaultOutDir);
   const range = `${args.base}..${args.head}`;
 
   let baseSha = '';
   let headSha = '';
-  let diffStat = '';
   let nameStatus = '';
   let numStatRaw = '';
-  let dirStatRaw = '';
 
   try {
     baseSha = runGit(repo, ['rev-parse', args.base]);
     headSha = runGit(repo, ['rev-parse', args.head]);
-    {
-      const diffArgs = ['diff', '--color=never', '--no-ext-diff', '--stat'];
-      if (args.findRenames) diffArgs.push(`--find-renames=${args.findRenames}`);
-      if (args.findCopies) diffArgs.push(`--find-copies=${args.findCopies}`);
-      diffArgs.push(range);
-      diffStat = runGit(repo, diffArgs);
-    }
-    {
-      const nsArgs = [
-        'diff',
-        '--color=never',
-        '--no-ext-diff',
-        '--name-status',
-      ];
-      if (args.findRenames) nsArgs.push(`--find-renames=${args.findRenames}`);
-      if (args.findCopies) nsArgs.push(`--find-copies=${args.findCopies}`);
-      nsArgs.push(range);
-      nameStatus = runGit(repo, nsArgs);
-    }
-    {
-      const nsArgs = [
-        'diff',
-        '--color=never',
-        '--no-ext-diff',
-        '--numstat',
-        range,
-      ];
-      numStatRaw = runGit(repo, nsArgs);
-    }
-    {
-      const dsArgs = [
-        'diff',
-        '--color=never',
-        '--no-ext-diff',
-        '--dirstat=files,50',
-        range,
-      ];
-      try {
-        dirStatRaw = runGit(repo, dsArgs);
-      } catch {
-        dirStatRaw = '';
-      }
-    }
-    {
-    }
+    nameStatus = runGit(repo, [
+      'diff',
+      '--color=never',
+      '--no-ext-diff',
+      '--name-status',
+      '-M',
+      '-C',
+      range,
+    ]);
+    numStatRaw = runGit(repo, [
+      'diff',
+      '--color=never',
+      '--no-ext-diff',
+      '--numstat',
+      '-M',
+      '-C',
+      range,
+    ]);
   } catch (error) {
     console.error('Failed to run git commands.');
     console.error(error.message || error);
     process.exit(1);
   }
 
-  let files = formatNameStatus(nameStatus);
-  if (args.include.length || args.exclude.length) {
-    const includeRes = args.include.map((p) => new RegExp(p));
-    const excludeRes = args.exclude.map((p) => new RegExp(p));
-    files = files.filter((f) => {
-      const p = f.filePath || '';
-      const included =
-        includeRes.length === 0 || includeRes.some((r) => r.test(p));
-      const excluded = excludeRes.some((r) => r.test(p));
-      return included && !excluded;
-    });
+  if (args.out && args.outDir) {
+    console.error('Use either --out or --out-dir, not both.');
+    process.exit(1);
   }
-  const statusPriority = {
-    A: 0,
-    M: 1,
-    R: 2,
-    C: 3,
-    D: 4,
-    T: 5,
-    U: 6,
-  };
-  files.sort((a, b) => {
-    const sa = (a.status || '').charAt(0);
-    const sb = (b.status || '').charAt(0);
-    const pa = statusPriority.hasOwnProperty(sa) ? statusPriority[sa] : 9;
-    const pb = statusPriority.hasOwnProperty(sb) ? statusPriority[sb] : 9;
-    if (pa !== pb) return pa - pb;
-    return (a.filePath || '').localeCompare(b.filePath || '');
-  });
-  const pathStats = {};
-  if (numStatRaw) {
-    numStatRaw
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .forEach((line) => {
-        const parts = line.split('\t');
-        const add = parts[0];
-        const del = parts[1];
-        const pathPart = parts.slice(2).join('\t');
-        let targetPath = pathPart;
-        const arrowIdx = pathPart.indexOf(' -> ');
-        if (arrowIdx >= 0) {
-          targetPath = pathPart.slice(arrowIdx + 4);
-        }
-        pathStats[targetPath] = {
-          added: add === '-' ? null : Number(add || 0),
-          deleted: del === '-' ? null : Number(del || 0),
-          isBinary: add === '-' || del === '-',
-        };
-      });
-  }
-  for (const f of files) {
-    const stat = pathStats[f.filePath];
-    if (stat) {
-      f.added = stat.added;
-      f.deleted = stat.deleted;
-      f.isBinary = stat.isBinary || false;
-    } else {
-      f.added = 0;
-      f.deleted = 0;
-      f.isBinary = false;
-    }
-  }
-  const statusCounts = {};
+
+  const files = formatNameStatus(nameStatus);
+  const pathStats = buildPathStats(numStatRaw);
   let totalAdded = 0;
   let totalDeleted = 0;
-  for (const f of files) {
-    const key = (f.status || '').charAt(0) || '-';
-    statusCounts[key] = (statusCounts[key] || 0) + 1;
-    if (typeof f.added === 'number') totalAdded += f.added;
-    if (typeof f.deleted === 'number') totalDeleted += f.deleted;
+  for (const file of files) {
+    const stat = pathStats[file.filePath];
+    if (stat) {
+      file.added = stat.added;
+      file.deleted = stat.deleted;
+      file.isBinary = stat.isBinary || false;
+    } else {
+      file.added = 0;
+      file.deleted = 0;
+      file.isBinary = false;
+    }
+    if (typeof file.added === 'number') totalAdded += file.added;
+    if (typeof file.deleted === 'number') totalDeleted += file.deleted;
   }
-  const dirStats = [];
-  if (dirStatRaw) {
-    dirStatRaw
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .forEach((l) => {
-        const m = l.match(/^(\d+(?:\.\d+)?)%\s+(.+)$/);
-        if (m) dirStats.push({ percent: Number(m[1]), dir: m[2] });
-      });
+
+  if (!args.out) {
+    const diffsDir = path.join(outDir, 'diffs');
+    fs.mkdirSync(diffsDir, { recursive: true });
+
+    for (const file of files) {
+      if (!file.filePath) continue;
+      const diffRelPath = path.join('diffs', `${file.filePath}.diff`);
+      file.diffRelPath = diffRelPath;
+      const diffPath = path.join(outDir, diffRelPath);
+      const diffPathDir = path.dirname(diffPath);
+      fs.mkdirSync(diffPathDir, { recursive: true });
+
+      if (file.isBinary) {
+        fs.writeFileSync(diffPath, 'Binary change detected; diff omitted.\n');
+        continue;
+      }
+      try {
+        const diffContent = runGit(repo, [
+          'diff',
+          '--color=never',
+          '--no-ext-diff',
+          '--binary',
+          `-U${args.context}`,
+          '-M',
+          '-C',
+          range,
+          '--',
+          file.filePath,
+        ]);
+        if (diffContent && diffContent.trim()) {
+          const limited = limitLines(diffContent, args.maxFileDiffLines);
+          fs.writeFileSync(
+            diffPath,
+            limited.truncated
+              ? `${limited.content}\n\n[Truncated to ${args.maxFileDiffLines} lines]\n`
+              : `${limited.content}\n`
+          );
+          if (limited.truncated) {
+            file.truncated = true;
+          }
+        } else {
+          fs.writeFileSync(diffPath, 'No diff content.\n');
+        }
+      } catch (e) {
+        fs.writeFileSync(diffPath, `Failed to load diff: ${e.message}\n`);
+      }
+    }
   }
-  const commits = [];
-  if (commitLogRaw) {
-    commitLogRaw
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .forEach((l) => {
-        const [hash, author, date, subject] = l.split('|');
-        commits.push({ hash, author, date, subject });
-      });
-  }
+
   const lines = [];
   const now = new Date().toISOString();
 
@@ -298,111 +280,88 @@ function main() {
   lines.push(`- Head: ${args.head} (${headSha})`);
   lines.push(`- Range: ${range}`);
   lines.push(`- Files changed: ${files.length}`);
-  lines.push(`- Generated at: ${now}`);
-  lines.push('');
-  lines.push('## Stats');
-  lines.push('');
   lines.push(`- Added lines: ${totalAdded}`);
   lines.push(`- Deleted lines: ${totalDeleted}`);
-  lines.push(
-    `- Status counts: ${Object.keys(statusCounts)
-      .sort()
-      .map((k) => `${k}:${statusCounts[k]}`)
-      .join(', ')}`
-  );
-  if (dirStats.length) {
-    lines.push(
-      `- Top impacted directories: ${dirStats
-        .slice(0, 5)
-        .map((d) => `${d.dir}(${d.percent}%)`)
-        .join(', ')}`
-    );
+  if (args.maxFileDiffLines > 0) {
+    lines.push(`- Per-file diff lines: <= ${args.maxFileDiffLines}`);
   }
-  lines.push('');
-  lines.push('## Summary');
-  lines.push('');
-  lines.push('```');
-  lines.push(diffStat || 'No changes.');
-  lines.push('```');
-  lines.push('');
-  lines.push('## Commits');
-  lines.push('');
-  if (commits.length === 0) {
-    lines.push('- No commits.');
-  } else {
-    for (const c of commits) {
-      lines.push(`- ${c.hash} ${c.subject} (${c.author}, ${c.date})`);
-    }
+  if (!args.out) {
+    lines.push(`- Diff directory: ${outDir}`);
   }
+  lines.push(`- Generated at: ${now}`);
   lines.push('');
+
   lines.push('## Files');
   lines.push('');
-  lines.push('| Status | Path | +lines | -lines | Notes |');
-  lines.push('| --- | --- | ---: | ---: | --- |');
+  lines.push('| Status | Path | +lines | -lines | Notes | Diff |');
+  lines.push('| --- | --- | ---: | ---: | --- | --- |');
   if (files.length === 0) {
-    lines.push('| - | - | 0 | 0 | - |');
+    lines.push('| - | - | 0 | 0 | - | - |');
   } else {
     for (const file of files) {
       const notes = [];
       if (file.isBinary) notes.push('binary');
-      if (file.similarity !== null && file.similarity !== undefined)
+      if (file.similarity !== null && file.similarity !== undefined) {
         notes.push(`similarity:${file.similarity}%`);
+      }
+      if (file.truncated) notes.push('truncated');
+      const diffCell = args.out ? 'inline' : file.diffRelPath || '-';
       lines.push(
         `| ${file.status} | ${file.displayPath} | ${file.added ?? ''} | ${
           file.deleted ?? ''
-        } | ${notes.join('; ')} |`
+        } | ${notes.join('; ')} | ${diffCell} |`
       );
     }
   }
   lines.push('');
 
-  lines.push('## Per-file Details');
-  lines.push('');
-  if (files.length === 0) {
-    lines.push('No file changes.');
-  } else {
-    for (const file of files) {
-      lines.push(`### ${file.status} ${file.displayPath}`);
-      const headerNotes = [];
-      if (file.isBinary) headerNotes.push('binary');
-      if (file.similarity !== null && file.similarity !== undefined)
-        headerNotes.push(`similarity:${file.similarity}%`);
-      if (headerNotes.length) lines.push(`- Notes: ${headerNotes.join('; ')}`);
-      lines.push(
-        `- +lines: ${file.added ?? ''}  -lines: ${file.deleted ?? ''}`
-      );
-      lines.push('');
-      if (file.isBinary) {
-        lines.push('_Binary change detected; diff content omitted._');
-      } else
+  if (args.out) {
+    lines.push('## Diff');
+    lines.push('');
+    if (files.length === 0) {
+      lines.push('No file changes.');
+    } else {
+      for (const file of files) {
+        lines.push(`### ${file.status} ${file.displayPath}`);
+        lines.push(
+          `- +lines: ${file.added ?? ''}  -lines: ${file.deleted ?? ''}`
+        );
+        if (file.isBinary) {
+          lines.push('');
+          lines.push('_Binary change detected; diff omitted._');
+          lines.push('');
+          continue;
+        }
+        lines.push('');
         try {
           const diffContent = runGit(repo, [
             'diff',
             '--color=never',
             '--no-ext-diff',
             '--binary',
+            `-U${args.context}`,
+            '-M',
+            '-C',
             range,
             '--',
             file.filePath,
           ]);
-          const contentForWrite =
-            args.maxFileDiffLines && args.maxFileDiffLines > 0
-              ? diffContent
-                  .split('\n')
-                  .slice(0, args.maxFileDiffLines)
-                  .join('\n')
-              : diffContent;
-          if (contentForWrite && contentForWrite.trim()) {
+          if (diffContent && diffContent.trim()) {
+            const limited = limitLines(diffContent, args.maxFileDiffLines);
             lines.push('```diff');
-            lines.push(contentForWrite);
+            lines.push(limited.content);
             lines.push('```');
+            if (limited.truncated) {
+              lines.push(`_Truncated to ${args.maxFileDiffLines} lines._`);
+            }
           } else {
             lines.push('_No diff content_');
           }
         } catch (e) {
           lines.push(`_Failed to load diff: ${e.message}_`);
         }
-      lines.push('');
+        lines.push('');
+      }
     }
   }
 
@@ -410,110 +369,8 @@ function main() {
   if (args.out) {
     fs.writeFileSync(path.resolve(args.out), output, 'utf8');
   } else {
-    process.stdout.write(output);
-  }
-
-  if (args.jsonOut) {
-    const json = {
-      base: { ref: args.base, sha: baseSha },
-      head: { ref: args.head, sha: headSha },
-      range,
-      generatedAt: now,
-      stats: {
-        totalAdded,
-        totalDeleted,
-        statusCounts,
-        dirStats,
-      },
-      commits,
-      files: [],
-    };
-    for (const file of files) {
-      let diffSnippet = '';
-      if (file.isBinary) {
-        diffSnippet = '';
-      } else
-        try {
-          const diffContent = runGit(repo, [
-            'diff',
-            '--color=never',
-            '--no-ext-diff',
-            '--binary',
-            range,
-            '--',
-            file.filePath,
-          ]);
-          diffSnippet =
-            args.maxFileDiffLines && args.maxFileDiffLines > 0
-              ? diffContent
-                  .split('\n')
-                  .slice(0, args.maxFileDiffLines)
-                  .join('\n')
-              : diffContent;
-        } catch {}
-      json.files.push({
-        status: file.status,
-        similarity: file.similarity ?? null,
-        oldPath: file.oldPath ?? null,
-        path: file.filePath,
-        displayPath: file.displayPath,
-        added: file.added ?? null,
-        deleted: file.deleted ?? null,
-        isBinary: !!file.isBinary,
-        diff: diffSnippet,
-      });
-    }
-    fs.writeFileSync(
-      path.resolve(args.jsonOut),
-      JSON.stringify(json, null, 2),
-      'utf8'
-    );
-  }
-
-  if (args.diffDir) {
-    const diffDir = path.resolve(args.diffDir);
-    if (!fs.existsSync(diffDir)) {
-      fs.mkdirSync(diffDir, { recursive: true });
-    }
-
-    console.error(`\nGenerating diff files in ${diffDir}...`);
-
-    for (const file of files) {
-      if (file.status.startsWith('D')) continue;
-
-      try {
-        const diffContent = runGit(repo, [
-          'diff',
-          '--color=never',
-          '--no-ext-diff',
-          '--binary',
-          range,
-          '--',
-          file.filePath,
-        ]);
-        if (diffContent) {
-          const targetPath = path.join(diffDir, `${file.filePath}.diff`);
-          const targetDir = path.dirname(targetPath);
-          if (!fs.existsSync(targetDir)) {
-            fs.mkdirSync(targetDir, { recursive: true });
-          }
-          const contentForWrite =
-            args.maxFileDiffLines && args.maxFileDiffLines > 0
-              ? diffContent
-                  .split('\n')
-                  .slice(0, args.maxFileDiffLines)
-                  .join('\n')
-              : diffContent;
-          fs.writeFileSync(targetPath, contentForWrite, 'utf8');
-        }
-      } catch (e) {
-        console.error(
-          `Failed to generate diff for ${file.filePath}`,
-          e.message
-        );
-      }
-    }
-    console.error('Diff files generation completed.');
+    fs.writeFileSync(path.join(outDir, 'index.md'), output, 'utf8');
+    process.stdout.write(`Diff report written to ${outDir}\n`);
   }
 }
 
