@@ -1,6 +1,7 @@
 param(
   [string]$RepoRoot = "",
+  [string]$TargetDir = "",
   [switch]$NoPull,
   [switch]$Prune
 )
-& "$PSScriptRoot\core\sync.ps1" -AgentName "codex" -RepoRoot $RepoRoot -NoPull:$NoPull -Prune:$Prune
+& "$PSScriptRoot\core\sync.ps1" -AgentName "codex" -RepoRoot $RepoRoot -TargetDir $TargetDir -NoPull:$NoPull -Prune:$Prune

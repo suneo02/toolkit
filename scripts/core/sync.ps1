@@ -1,6 +1,7 @@
 param(
   [string]$AgentName = "codex",
   [string]$RepoRoot = "",
+  [string]$TargetDir = "",
   [switch]$NoPull,
   [switch]$Prune
 )
@@ -15,7 +16,12 @@ if (-not $RepoRoot) {
 }
 
 $RepoSkills = Join-Path $RepoRoot "skills"
-$Target = Join-Path $env:USERPROFILE ".$AgentName\skills"
+
+if ($TargetDir) {
+  $Target = $TargetDir
+} else {
+  $Target = Join-Path $env:USERPROFILE ".$AgentName\skills"
+}
 
 Write-Host "Syncing $AgentName skills..."
 Write-Host "Repo: $RepoRoot"
