@@ -113,6 +113,19 @@ Gemini:
 ./scripts/gemini-skill-adopt [skill-name]
 ```
 
+### 5. 高级用法 (自定义路径)
+
+所有脚本 (`bootstrap`, `stow`, `adopt`) 均支持以下参数：
+
+- `-t, --target-dir <path>`: 指定目标 skills 目录（默认为 `~/.<agent>/skills`）
+- `-r, --repo-root <path>`: 指定仓库根目录
+
+示例：
+
+```bash
+./scripts/codex-skills-stow.sh --target-dir /path/to/custom/skills
+```
+
 ## 脚本逻辑复用说明
 
 - `scripts/core/` 包含通用逻辑（bootstrap, stow, adopt, sync）。

@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -z "${TARGET_AGENT:-}" ]; then
-  echo "Error: TARGET_AGENT environment variable is not set." >&2
-  exit 1
-fi
-
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
-target_dir="${HOME}/.${TARGET_AGENT}/skills"
+
+if [ -n "${TARGET_AGENT:-}" ]; then
+  target_dir="${HOME}/.${TARGET_AGENT}/skills"
+else
+  target_dir=""
+fi
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case $1 in
     -t|--target-dir)
-      target_dir="$2"
+      if [[ "$2" == */skills ]] || [[ "$2" == */skills/ ]]; then
+        target_dir="$2"
+      else
+        target_dir="$2/skills"
+      fi
       shift 2
       ;;
     -r|--repo-root)
@@ -28,7 +32,14 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Stowing ${TARGET_AGENT} skills..."
+if [ -z "$target_dir" ]; then
+  echo "Error: Target directory not specified. Set TARGET_AGENT env var or use --target-dir." >&2
+  exit 1
+fi
+
+agent_name="${TARGET_AGENT:-custom}"
+
+echo "Stowing ${agent_name} skills..."
 
 if ! command -v stow >/dev/null 2>&1; then
   echo "stow not found. Install it first (macOS: brew install stow)" >&2
@@ -36,8 +47,7 @@ if ! command -v stow >/dev/null 2>&1; then
 fi
 
 if [ ! -d "$target_dir" ]; then
-  echo "${TARGET_AGENT} skills dir not found: $target_dir" >&2
-  exit 1
+  mkdir -p "$target_dir"
 fi
 
 stow -d "$repo_root" -t "$target_dir" -R --ignore='\.DS_Store$' skills
