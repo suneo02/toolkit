@@ -1,0 +1,22 @@
+{
+  "name": "suneo-agent-skills",
+  "version": "1.0.0",
+  "description": "Cross-platform agent skills management",
+  "type": "module",
+  "scripts": {
+    "codex:sync": "node scripts/codex.js sync",
+    "codex:bootstrap": "node scripts/codex.js bootstrap",
+    "codex:adopt": "node scripts/codex.js adopt",
+    "gemini:sync": "node scripts/gemini.js sync",
+    "gemini:bootstrap": "node scripts/gemini.js bootstrap",
+    "gemini:adopt": "node scripts/gemini.js adopt"
+  },
+  "keywords": [
+    "agent",
+    "skills",
+    "codex",
+    "gemini"
+  ],
+  "author": "",
+  "license": "MIT"
+}
