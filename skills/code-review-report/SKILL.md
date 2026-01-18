@@ -1,57 +1,53 @@
 ---
 name: code-review-report
-description: Generate a concise, issue-focused Chinese code review report using a fixed Markdown template. Use when a code review or a structured issue list/risk assessment is requested.
+description: Structured Chinese code review report template. Use when formatting review results (from subagent/Oracle or manual review) into a standardized Markdown report with issue tracking, risk assessment, and compliance checks.
 ---
 
-# Code Review Report
+# Code Review Report Template
 
 ## Overview
 
-Produce a minimal-length Chinese review report focused on issues, risks, gaps, and recommendations. Include a brief review (复核) step to validate completeness and formatting. If there are no issues, say so explicitly.
+Format review results into a structured Chinese Markdown report. Does NOT perform the actual review—assumes review findings are already available (from Oracle/subagent or manual analysis).
 
 ## Workflow
 
-1) Confirm scope: base branch, commit range, requirements, or spec.
-2) Read changes: locate key logic, data flow, and boundary handling.
-3) Build issue list: issues only, ordered by severity; each includes file/line, impact, and recommendation.
-4) Review pass (复核): check coverage, severity tagging, and template compliance; fix omissions or inconsistencies.
-5) Output with the template: follow it strictly and avoid extra explanation.
+1. Collect review inputs: scope, findings by category (requirements/risks/scope/standards)
+2. Format using template: populate sections with provided findings
+3. Add review metadata: branch, commit range, date
+4. Output: structured Markdown report
 
-## Missing Info Prompts
+## Template Structure
 
-- What are the base branch and commit range?
-- Is there a requirement doc or spec to align with?
-- Should I output only the report body (Markdown)?
-- Is a separate reviewer or specific review checklist required?
+The report follows a fixed 4-section structure:
+1. 需求实现完整性 (Requirements completeness)
+2. 线上风险评估 (Production risk assessment)
+3. 变更范围控制 (Change scope control)
+4. 代码规范符合性 (Code standards compliance)
 
-## Language Requirements
+Each section includes:
+- ✅/❌ result indicator
+- Issue list (if any): file/line, impact, recommendation
+- Risk severity tagging (高/中/低) for risk items
 
-- The report must be written in Chinese.
+## When Info Missing
+
+- What is the review scope (branch/commit range)?
+- What findings should be included in each section?
+- Should the report include a 复核记录 (review verification) section?
+
+## Language
+
+All output in Chinese
 
 ## References
 
-- references/code-review-rule.md
+- Template format: references/code-review-rule.md
 
-## Resources (Optional)
+## Script (Optional)
 
-- scripts/generate-diff-report.js: generate an AI-friendly diff report.
-
-## Script Usage
-
-Use the script when a human needs a readable diff summary for AI review.
+`scripts/generate-diff-report.js` generates AI-friendly diff summaries for review input:
 
 ```bash
 node skills/code-review-report/scripts/generate-diff-report.js \
-  --base main \
-  --head HEAD \
-  --repo . \
-  --out-dir /tmp/diff-report \
-  --max-file-diff-lines 200 \
-  --context 3
+  --base main --head HEAD --repo . --out-dir /tmp/diff-report
 ```
-
-Notes:
-- If `--out-dir` is omitted, it writes to `diff-report/` under the repo.
-- Use `--out /tmp/diff-report.md` for a single-file report with inline diffs.
-- `--max-file-diff-lines 0` means no limit (default).
-- `--context` controls diff context lines (default 3).
