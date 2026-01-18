@@ -1,51 +1,56 @@
-# Spec 模板示例
+# Spec 模板
 
-## README.md 模板
+## spec-contract.md 模板
 
-# <task> Spec
+```markdown
+# <task> 契约
 
-## 状态
+## 目标
+- 要实现的核心功能
 
-- 当前状态：draft
+## 非目标
+- 明确不在本次范围
 
-## 索引
+## 约束
+- 兼容性/性能/安全要求
 
-- [设计](spec-design.md)
-- [API](spec-api.md)
-- [测试](spec-testing.md)
+## 验收标准
+- 如何确认完成
 
-## 链接
-
-- 规范：references/spec-doc-rule.md
-- 实现计划：implementation-plan.json
-- 代码：@see /apps/example/src/index.ts
+## 关键风险
+- 风险项与影响面
+```
 
 ## implementation-plan.json 模板
 
+```json
 [
   {
     "id": "task-1",
     "title": "任务简述",
-    "owner": "username",
-    "code_paths": ["/apps/example/src/index.ts"],
-    "@see": ["/docs/specs/<task>/spec-design.md"],
     "status": "failed",
-    "notes": "补充说明"
+    "validation": "npm test -- feature.test.ts",
+    "code_paths": ["/apps/example/src/index.ts"],
+    "@see": ["/docs/specs/<task>/spec-design.md"]
   }
 ]
+```
 
-## spec-*.md 模板
+## spec-design.md 模板（可选）
 
-# <主题> 规格
+```markdown
+# <task> 设计
 
-## 目标与范围
+## 技术选型
+- 选择与理由
 
-- ...
+## 方案
+- 描述
+- 探索发现支撑
 
-## 方案与约束
+## 复用组件
+- `<Component>` @see /packages/ui/Component.tsx
 
-- ...
-
-## 验证方式
-
-- ...
+## 验证计划
+- 测试覆盖/手工验证步骤
+```

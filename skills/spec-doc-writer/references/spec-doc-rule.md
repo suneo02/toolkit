@@ -1,56 +1,58 @@
-# Spec 文档规范摘要
+# Spec 文档规范
 
-## 核心规则
+## 核心原则
+
+- **契约优先**：先写目标/约束/验收，再写实现计划
+- **活文档**：计划可随探索结果更新
+- **验证绑定**：每个 todo 必须有验证方式
+
+## 文档结构
+
+docs/specs/<task>/
+- **spec-contract.md**：目标、约束、验收、风险（不写实现细节）
+- **implementation-plan.json**：todo 列表 + 验证方式
+- **spec-design.md**（可选）：技术方案、组件复用
+
+## Contract Spec 要求
+
+只写不易过时的内容：
+- 目标与非目标
+- 约束（兼容性/性能/安全）
+- 验收标准
+- 关键风险
+
+禁止写：具体文件列表、写死方案、实现步骤
+
+## implementation-plan.json 格式
+
+```json
+[
+  {
+    "id": "task-1",
+    "title": "任务简述",
+    "status": "failed",
+    "validation": "npm test -- *.test.ts",
+    "code_paths": ["/path/to/file.ts"],
+    "@see": ["/docs/specs/<task>/spec-design.md"]
+  }
+]
+```
+
+- status: failed（初始）| success | blocked
+- validation: 必填，命令或手工验证步骤
+- 流程：先全量 failed → 逐条验证并更新 success
+
+## Design Spec（可选）
+
+写技术方案时：
+- 记录探索发现（现有入口、依赖）
+- 说明方案选择理由
+- 引用可复用组件：`@see /packages/ui/Button.tsx`
+
+## 基本规则
 
 - 语言：中文
-- 目标：任务拆解与验证
-- 结构：docs/specs/<task>/README.md + implementation-plan.json + spec-*.md
-- 原子提交：每次只更新一个任务状态
-
-## 写作要求
-
-- 避免大段代码，必要片段 < 10 行
-- 文档长度 <= 150 行，超出需拆分子 spec
-- 使用绝对路径或 PR 链接做引用
-- **强制组件复用**：在定义 UI 或交互规格前，先搜索设计系统、共享 UI 库或组件目录，优先复用已有组件。
-- **引用已有组件**：在 spec 中明确列出复用组件的代码路径（使用 `@see`），并说明复用方式/集成点。
-
-## 文档职责分离 (Separation of Concerns)
-
-- **spec-requirements-*.md (需求文档)**
-  - **包含**：用户场景、交互行为、业务逻辑、输入输出定义、错误提示文案。
-  - **禁止**：具体的代码实现细节（如 Prop 名称、具体的函数调用、`if (value.endsWith('@'))` 等代码逻辑）。
-  - **原则**：描述 "What" (要做什么) 和 "Behavior" (表现是什么)，而不是 "How" (怎么写代码)。
-
-- **spec-design.md (设计文档)**
-  - **包含**：组件结构、技术选型、Prop 映射、组件复用策略、数据流、具体实现逻辑引用。
-  - **职责**：将需求转化为工程实现的蓝图。
-
-## 目录结构
-
-- docs/specs/<task>/
-  - README.md：索引、状态、链接
-  - implementation-plan.json：任务追踪源
-  - spec-*.md：子文档
-
-## implementation-plan.json 规则
-
-- 数组结构
-- 字段：id、title、owner、code_paths、status、@see
-- status：failed（初始） | success | blocked | skipped
-- 流程：先全量 failed -> 实现&验证 -> 逐条更新 success
-
-## 双向引用示例
-
-- 文档 -> 代码：@see /apps/<app>/src/index.tsx
-- 代码 -> 文档：// @see /docs/specs/<task>/spec-design.md
-- 组件引用：复用 `<ComponentName>` (@see /packages/<ui-lib>/src/components/<ComponentName>.tsx)
-
-## Checklist
-
-- implementation-plan.json 存在且有效
-- 任务初始 status 全为 failed
-- 状态更新使用原子提交
-- 文档长度与引用规范满足要求
-- **已检查并引用现有可复用组件**
-- **需求文档中无具体代码逻辑**
+- 文档长度：<= 150 行
+- 避免大段代码（< 10 行）
+- 使用绝对路径或 @see 引用
+- 状态更新：原子提交

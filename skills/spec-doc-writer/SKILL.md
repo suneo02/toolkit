@@ -1,40 +1,45 @@
 ---
 name: spec-doc-writer
-description: Workflow and standards for writing and maintaining spec docs and implementation-plan.json (docs/specs/<task>/README.md, implementation-plan.json, spec-*.md). Use for task breakdowns, validation plans, spec index generation, or spec status updates. Follow references/spec-doc-rule.md formats and @see rules.
+description: Contract-first spec writing for task planning. Use when breaking down tasks into contract (goals/constraints/acceptance) and execution plan (todos with validation). Creates spec-contract.md and implementation-plan.json under docs/specs/<task>/. Follow references/spec-doc-rule.md for contract-first principles.
 ---
 
 # Spec Doc Writer
 
 ## Overview
 
-Follow repo spec conventions to create or update README.md, implementation-plan.json, and spec-*.md under docs/specs/<task>/, maintaining bidirectional @see references and task status tracking.
+Create contract-first spec docs under docs/specs/<task>/ following contract-first principles: write goals/constraints/acceptance before implementation details.
 
 ## Workflow
 
-1. Collect inputs: task name, goals/scope, owner, key code paths, acceptance criteria, and required sub-doc types (design/api/testing, etc.).
-2. **Reuse Check**: Before writing specs, search shared UI libraries/design system packages and existing components in the codebase to reuse. Avoid duplication.
-3. Confirm directory: create README.md, implementation-plan.json, and spec-*.md under docs/specs/<task>/.
-4. Write README.md: include status, index, and links; use templates in references/spec-templates.md; keep it in Chinese.
-5. Write implementation-plan.json: list task array; default all task status to failed; use absolute paths and @see.
-6. Write spec-*.md: one topic per file, keep length <= 150 lines; avoid large code blocks, include only necessary snippets; **explicitly reference reused components**.
-7. Create bidirectional references: docs use @see to point to code; code comments point back to spec.
-8. Validate rules: check against references/spec-doc-rule.md; status updates must be verified one by one and kept atomic.
-9. Output result: report new/updated file paths and open questions.
+1. Collect inputs: task name, goals, constraints, acceptance criteria, key risks
+2. **Reuse Check**: Search existing components/patterns before defining new solutions
+3. Create spec-contract.md: goals, non-goals, constraints, acceptance, risks (no implementation details)
+4. Create implementation-plan.json: todos with validation methods (all status: "failed" initially)
+5. (Optional) Create spec-design.md: technical approach, reused components, exploration findings
+6. Validate: check against references/spec-doc-rule.md; ensure todos have validation methods
+7. Output: report created files and validation plan
 
-## Prompts To Ask When Info Is Missing
+## Key Principles
 
-- What should the task name and directory be?
-- Who is the owner and what are the acceptance criteria?
-- Which sub-docs are needed (design/api/testing/others)?
-- What are the key code paths and @see targets?
-- **Have you checked for existing components to reuse?**
+- **Contract first**: Write what/why before how
+- **Validation binding**: Every todo needs validation method
+- **Living docs**: Plans update with exploration findings
+- **No premature commitment**: Avoid writing implementation details in contract
 
-## Language Requirements
+## Prompts When Info Missing
 
-- All spec documents and templates must be written in Chinese.
-- Code comments used for @see links must be written in Chinese.
+- What are the goals and non-goals?
+- What are the constraints (compatibility/performance/security)?
+- How will we verify completion?
+- What are the key risks?
+- Have you checked for existing components to reuse?
+
+## Language
+
+- All spec documents in Chinese
+- Code comments for @see links in Chinese
 
 ## References
 
-- Rule summary: references/spec-doc-rule.md
-- Template examples: references/spec-templates.md
+- Contract-first rules: references/spec-doc-rule.md
+- Templates: references/spec-templates.md
