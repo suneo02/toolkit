@@ -5,7 +5,7 @@ This is my personal dev-learning toolkit for skills, workflow thinking, and expe
 
 ## What's Inside / 内容地图
 - **Skills**: AI/agent 的能力模块与规则集合（见 `skills/`，同步方式见 `docs/skills-management.md`）
-- **Workflow notes**: 开发流程/协作/规划方法的思考（见 `docs/coding-process/gpt.md`、`docs/coding-process/gpt2.md`、`docs/coding-process/grok.md`、`docs/coding-process/grok2.md`）
+- **Workflow notes**: 开发流程/协作/规划方法的思考（见 `docs/coding-process/philosophy.md`、`docs/coding-process/workflow.md`、`docs/coding-process/omo-implementation.md`）
 - **Repo rules for agents**: 仓库级工作约束（见 `AGENTS.md`）
 
 ## Core Ideas / 核心原则
@@ -17,10 +17,9 @@ This is my personal dev-learning toolkit for skills, workflow thinking, and expe
 
 ## Docs / 文档入口
 - **Skills management**: [docs/skills-management.md](docs/skills-management.md)
-- **Coding process**: [docs/coding-process/gpt.md](docs/coding-process/gpt.md)
-- **Coding process (alt)**: [docs/coding-process/gpt2.md](docs/coding-process/gpt2.md)
-- **Coding process (alt)**: [docs/coding-process/grok.md](docs/coding-process/grok.md)
-- **Coding process (alt)**: [docs/coding-process/grok2.md](docs/coding-process/grok2.md)
+- **Coding process - Philosophy**: [docs/coding-process/philosophy.md](docs/coding-process/philosophy.md)
+- **Coding process - Workflow**: [docs/coding-process/workflow.md](docs/coding-process/workflow.md)
+- **Coding process - OMO implementation**: [docs/coding-process/omo-implementation.md](docs/coding-process/omo-implementation.md)
 - **Agent rules**: [AGENTS.md](AGENTS.md)
 
 ## How I Use This Repo / 我的使用方式
