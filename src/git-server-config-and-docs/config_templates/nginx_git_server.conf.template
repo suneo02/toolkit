@@ -1,0 +1,20 @@
+server {
+    listen 8888; # Git 服务端口
+    server_name localhost;
+
+    # Git 仓库的根目录
+    root /path/to/your/git-repos;
+
+    client_max_body_size 0; # 允许大文件推送
+
+    location ~ /git(/.*) {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /path/to/your/git-http-backend; # 需要替换为实际路径
+        fastcgi_param GIT_HTTP_EXPORT_ALL "";
+        fastcgi_param GIT_PROJECT_ROOT /path/to/your/git-repos;
+        fastcgi_param PATH_INFO $1;
+        fastcgi_param GIT_CONFIG_KEY_0 safe.directory;
+        fastcgi_param GIT_CONFIG_VALUE_0 /path/to/your/git-repos;
+        fastcgi_pass unix:/opt/homebrew/var/run/fcgiwrap.sock;
+    }
+}
