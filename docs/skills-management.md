@@ -1,13 +1,13 @@
 ---
 title: Skills Management
-description: Cross-platform skills management system for Codex and Gemini agents using Node.js
+description: Cross-platform skills management system for Codex, Gemini, and Claude agents using Node.js
 ---
 
 # Skills Management
 
 ## 概述
 
-统一的跨平台技能管理系统，使用 Node.js 实现，支持 Codex 和 Gemini 双 Agent。自动处理 Symlink (Unix) 和 Junction (Windows)，实现技能的 Git 版本管理与本地同步。
+统一的跨平台技能管理系统，使用 Node.js 实现，支持 Codex、Gemini、Claude 等 Agent。自动处理 Symlink (Unix) 和 Junction (Windows)，实现技能的 Git 版本管理与本地同步。
 
 **核心优势**：
 
@@ -15,6 +15,7 @@ description: Cross-platform skills management system for Codex and Gemini agents
 - ✅ 跨平台 - Windows/macOS/Linux 通用
 - ✅ 简单易用 - 统一命令接口
 - ✅ Git 管理 - 多机同步无缝
+- ✅ 可配置 - Agent 目录与扩展可配置
 
 ## 快速开始
 
@@ -25,27 +26,31 @@ description: Cross-platform skills management system for Codex and Gemini agents
 cd ~/Documents/suneo-agent-skills
 
 # 2. 初始化（会自动备份现有内容）
-node scripts/codex.js bootstrap     # 初始化 Codex
-node scripts/gemini.js bootstrap    # 初始化 Gemini
+node scripts/skills-manager.js codex bootstrap     # 初始化 Codex
+node scripts/skills-manager.js gemini bootstrap    # 初始化 Gemini
+node scripts/skills-manager.js claude bootstrap    # 初始化 Claude
 
-# 完成！所有技能已链接到 ~/.codex/skills 和 ~/.gemini/skills
+# 完成！所有技能已链接到 ~/.codex/skills、~/.gemini/skills、~/.claude/skills
 ```
 
 ### 日常使用
 
 ```bash
 # 同步最新技能（推荐每天运行一次）
-node scripts/codex.js sync
+node scripts/skills-manager.js codex sync
+
+# 一键同步所有 Agent
+node scripts/skills-manager.js all sync
 
 # 查看技能状态
-node scripts/codex.js list
+node scripts/skills-manager.js codex list
 ```
 
 ### 新增技能
 
 ```bash
 # Agent 创建了新技能后，将其纳入 Git 管理
-node scripts/codex.js adopt my-new-skill
+node scripts/skills-manager.js codex adopt my-new-skill
 
 # 提交到 Git
 git add skills/my-new-skill
@@ -61,27 +66,27 @@ git push
 
 ```bash
 # 机器 A - 创建并推送新技能
-node scripts/codex.js adopt awesome-skill
+node scripts/skills-manager.js codex adopt awesome-skill
 git add skills/awesome-skill
 git commit -m "Add: awesome-skill"
 git push
 
 # 机器 B - 拉取并同步
-node scripts/codex.js sync  # 自动 git pull 并创建链接
+node scripts/skills-manager.js codex sync  # 自动 git pull 并创建链接
 ```
 
 ### 工作流 2: 定期维护
 
 ```bash
 # 每天或每周运行一次
-node scripts/codex.js sync --prune  # 同步并清理无效链接
+node scripts/skills-manager.js codex sync --prune  # 同步并清理无效链接
 ```
 
 ### 工作流 3: 查看和诊断
 
 ```bash
 # 查看所有技能及其链接状态
-node scripts/codex.js list
+node scripts/skills-manager.js codex list
 
 # 输出示例：
 #   ● Linked          code-review-report
@@ -98,13 +103,13 @@ node scripts/codex.js list
 
 ```bash
 # 基础用法
-node scripts/codex.js sync
+node scripts/skills-manager.js codex sync
 
 # 跳过 git pull
-node scripts/codex.js sync --no-pull
+node scripts/skills-manager.js codex sync --no-pull
 
 # 同时清理无效链接
-node scripts/codex.js sync --prune
+node scripts/skills-manager.js codex sync --prune
 ```
 
 **功能**：
@@ -118,7 +123,7 @@ node scripts/codex.js sync --prune
 首次使用时运行，安全地迁移现有技能到 Git 管理。
 
 ```bash
-node scripts/codex.js bootstrap
+node scripts/skills-manager.js codex bootstrap
 ```
 
 **功能**：
@@ -137,7 +142,7 @@ node scripts/codex.js bootstrap
 将本地创建的技能迁移到 Git 仓库管理。
 
 ```bash
-node scripts/codex.js adopt my-skill
+node scripts/skills-manager.js codex adopt my-skill
 ```
 
 **功能**：
@@ -156,7 +161,7 @@ node scripts/codex.js adopt my-skill
 删除目标目录中的无效链接（仓库已不存在的技能）。
 
 ```bash
-node scripts/codex.js prune
+node scripts/skills-manager.js codex prune
 ```
 
 **安全性**：
@@ -170,7 +175,7 @@ node scripts/codex.js prune
 列出所有技能及其链接状态。
 
 ```bash
-node scripts/codex.js list
+node scripts/skills-manager.js codex list
 ```
 
 **输出说明**：
@@ -182,22 +187,54 @@ node scripts/codex.js list
 ### `help` - 查看帮助
 
 ```bash
-node scripts/codex.js help
+node scripts/skills-manager.js codex help
 ```
 
+### `all sync` - 一键同步所有 Agent
+
+```bash
+node scripts/skills-manager.js all sync
+```
+
+支持 `--no-pull` 和 `--prune`，作用于所有 Agent。
+
 ## 高级用法
+
+### 配置文件
+
+在仓库根目录使用 `skills-manager.config.json` 配置 Agent 列表与目录。该配置用于定义可用 Agent 与目标路径。
+
+```json
+{
+  "agents": [
+    { "name": "codex", "targetDir": "~/.codex/skills" },
+    { "name": "gemini", "targetDir": "~/.gemini/skills" },
+    { "name": "claude", "targetDir": "~/.claude/skills" },
+    {
+      "name": "custom",
+      "targetDir": {
+        "default": "~/.custom/skills",
+        "win32": "C:\\Users\\me\\.custom\\skills"
+      }
+    }
+  ]
+}
+```
+
+- `targetDir` 支持字符串或按平台区分（`win32`/`darwin`/`linux`/`default`）。
+- `~` 会自动解析为用户主目录，Windows 也适用。
 
 ### 自定义路径
 
 ```bash
 # 自定义仓库路径
-node scripts/codex.js sync --repo=/path/to/custom/repo
+node scripts/skills-manager.js codex sync --repo=/path/to/custom/repo
 
 # 自定义目标目录
-node scripts/codex.js sync --target=/path/to/custom/skills
+node scripts/skills-manager.js codex sync --target=/path/to/custom/skills
 
 # 组合使用
-node scripts/codex.js bootstrap \
+node scripts/skills-manager.js codex bootstrap \
   --repo=/custom/repo \
   --target=/custom/target
 ```
@@ -216,6 +253,14 @@ npm run codex:adopt -- my-skill
 npm run gemini:sync
 npm run gemini:bootstrap
 npm run gemini:adopt -- my-skill
+
+# Claude
+npm run claude:sync
+npm run claude:bootstrap
+npm run claude:adopt -- my-skill
+
+# Sync all
+npm run agents:sync
 ```
 
 ## 技术细节
@@ -224,9 +269,9 @@ npm run gemini:adopt -- my-skill
 
 ```
 scripts/
-├── skills-manager.js       # 核心跨平台逻辑（200+ 行）
-├── codex.js               # Codex CLI wrapper
-└── gemini.js              # Gemini CLI wrapper
+└── skills-manager.js       # 核心跨平台逻辑 & CLI 入口
+
+skills-manager.config.json  # Agent 配置
 ```
 
 **设计优势**：
@@ -249,6 +294,7 @@ scripts/
 - 读取目录：
   - Codex: `~/.codex/skills`
   - Gemini: `~/.gemini/skills`
+  - Claude: `~/.claude/skills`
 
 ### 系统要求
 
@@ -286,27 +332,37 @@ chmod +x scripts/*.js
 如果不想自动 pull，可以使用 `--no-pull` 参数：
 
 ```bash
-node scripts/codex.js sync --no-pull
+node scripts/skills-manager.js codex sync --no-pull
 ```
 
 ## 参考资料
 
 ### 相关命令对照
 
-| npm scripts                     | 直接调用                             |
-| ------------------------------- | ------------------------------------ |
-| `npm run codex:sync`            | `node scripts/codex.js sync`         |
-| `npm run codex:bootstrap`       | `node scripts/codex.js bootstrap`    |
-| `npm run codex:adopt -- <name>` | `node scripts/codex.js adopt <name>` |
+| npm scripts                     | 直接调用                                               |
+| ------------------------------- | ------------------------------------------------------ |
+| `npm run codex:sync`            | `node scripts/skills-manager.js codex sync`            |
+| `npm run codex:bootstrap`       | `node scripts/skills-manager.js codex bootstrap`       |
+| `npm run codex:adopt -- <name>` | `node scripts/skills-manager.js codex adopt <name>`    |
+| `npm run gemini:sync`           | `node scripts/skills-manager.js gemini sync`           |
+| `npm run gemini:bootstrap`      | `node scripts/skills-manager.js gemini bootstrap`      |
+| `npm run gemini:adopt -- <name>`| `node scripts/skills-manager.js gemini adopt <name>`   |
+| `npm run claude:sync`           | `node scripts/skills-manager.js claude sync`           |
+| `npm run claude:bootstrap`      | `node scripts/skills-manager.js claude bootstrap`      |
+| `npm run claude:adopt -- <name>`| `node scripts/skills-manager.js claude adopt <name>`   |
+| `npm run agents:sync`           | `node scripts/skills-manager.js all sync`              |
 
-### Gemini vs Codex
+### Agent 命令一致
 
-两个 Agent 的命令完全一致，只需替换脚本名：
+多个 Agent 的命令完全一致，只需替换 Agent 名称：
 
 ```bash
 # Codex
-node scripts/codex.js sync
+node scripts/skills-manager.js codex sync
 
 # Gemini
-node scripts/gemini.js sync
+node scripts/skills-manager.js gemini sync
+
+# Claude
+node scripts/skills-manager.js claude sync
 ```

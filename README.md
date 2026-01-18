@@ -1,56 +1,27 @@
-# Quick Start Guide
+# Skills Manager
 
-## 🚀 First Time Setup
+管理 Codex/Gemini/Claude 以及自定义 Agent 的技能同步。
 
-```bash
-# Clone this repository
-git clone <repo-url> ~/Documents/suneo-agent-skills
-cd ~/Documents/suneo-agent-skills
-
-# Initialize for Codex (backs up existing skills)
-node scripts/codex.js bootstrap
-
-# Initialize for Gemini (backs up existing skills)
-node scripts/gemini.js bootstrap
-```
-
-## 📦 Daily Sync
+## 基本用法
 
 ```bash
-# Sync Codex skills (pulls latest from Git)
-node scripts/codex.js sync
+# 初始化
+node scripts/skills-manager.js codex bootstrap
+node scripts/skills-manager.js gemini bootstrap
+node scripts/skills-manager.js claude bootstrap
 
-# Sync Gemini skills
-node scripts/gemini.js sync
+# 同步
+node scripts/skills-manager.js codex sync
+node scripts/skills-manager.js gemini sync
+node scripts/skills-manager.js claude sync
+
+# 一键同步
+node scripts/skills-manager.js all sync
+
+# 列表
+node scripts/skills-manager.js codex list
 ```
 
-## ➕ Add New Skill
+## 配置
 
-```bash
-# After agent creates a new skill, adopt it into the repo
-node scripts/codex.js adopt my-new-skill
-
-# Commit to Git
-git add skills/my-new-skill
-git commit -m "Add new skill: my-new-skill"
-git push
-```
-
-## 📋 View Status
-
-```bash
-# List all skills and their link status
-node scripts/codex.js list
-node scripts/gemini.js list
-```
-
-## 📖 Full Documentation
-
-See [docs/skills-management.md](./docs/skills-management.md) for complete documentation.
-
-## 🆘 Help
-
-```bash
-node scripts/codex.js help
-node scripts/gemini.js help
-```
+使用仓库根目录的 `skills-manager.config.json` 定义 Agent 和目标目录。

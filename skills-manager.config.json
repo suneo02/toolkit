@@ -1,0 +1,16 @@
+{
+  "agents": [
+    {
+      "name": "codex",
+      "targetDir": "~/.codex/skills"
+    },
+    {
+      "name": "gemini",
+      "targetDir": "~/.gemini/skills"
+    },
+    {
+      "name": "claude",
+      "targetDir": "~/.claude/skills"
+    }
+  ]
+}

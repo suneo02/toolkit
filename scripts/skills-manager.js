@@ -2,9 +2,9 @@
 
 import { exec } from 'child_process';
 import { existsSync, lstatSync } from 'fs';
-import { mkdir, readdir, rename, rm, symlink } from 'fs/promises';
+import { mkdir, readdir, readFile, rename, rm, symlink } from 'fs/promises';
 import { homedir, platform } from 'os';
-import { dirname, join, resolve } from 'path';
+import { dirname, isAbsolute, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 
@@ -13,6 +13,71 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const isWindows = platform() === 'win32';
+
+const CONFIG_FILENAME = 'skills-manager.config.json';
+
+function resolveUserPath(value) {
+  if (!value) {
+    return null;
+  }
+
+  if (value === '~') {
+    return homedir();
+  }
+
+  if (value.startsWith('~/') || value.startsWith('~\\')) {
+    return join(homedir(), value.slice(2));
+  }
+
+  if (isAbsolute(value)) {
+    return value;
+  }
+
+  return resolve(value);
+}
+
+function resolveTargetDir(targetDir) {
+  if (!targetDir) {
+    return null;
+  }
+
+  if (typeof targetDir === 'string') {
+    return resolveUserPath(targetDir);
+  }
+
+  if (typeof targetDir === 'object') {
+    const platformTarget = targetDir[platform()] || targetDir.default;
+    return resolveUserPath(platformTarget);
+  }
+
+  return null;
+}
+
+function normalizeAgentConfig(agentConfig) {
+  if (!agentConfig || !agentConfig.name) {
+    return null;
+  }
+
+  const name = String(agentConfig.name).trim();
+  if (!name) {
+    return null;
+  }
+
+  const targetDir = resolveTargetDir(agentConfig.targetDir) || resolveUserPath(`~/.${name}/skills`);
+  return { name, targetDir };
+}
+
+async function loadConfig(configPath) {
+  try {
+    const raw = await readFile(configPath, 'utf8');
+    return JSON.parse(raw);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return { agents: [] };
+    }
+    throw error;
+  }
+}
 
 /**
  * SkillsManager - Cross-platform agent skills management
@@ -25,7 +90,36 @@ export class SkillsManager {
     this.repoSkillsDir = join(this.repoRoot, 'skills');
   }
 
-  log(message, level = 'info') {
+  static async fromConfig(agentName, options = {}) {
+    const repoRoot = options.repoRoot || resolve(__dirname, '..');
+    const configPath = resolve(repoRoot, CONFIG_FILENAME);
+    const config = await loadConfig(configPath);
+    const configAgents = (config.agents || [])
+      .map(normalizeAgentConfig)
+      .filter(Boolean);
+    const agentConfig = configAgents.find(agent => agent.name === agentName);
+
+    const targetDir = options.targetDir || agentConfig?.targetDir || resolveUserPath(`~/.${agentName}/skills`);
+
+    return new SkillsManager(agentName, {
+      ...options,
+      repoRoot,
+      targetDir
+    });
+  }
+
+  static async listAgents(options = {}) {
+    const repoRoot = options.repoRoot || resolve(__dirname, '..');
+    const configPath = resolve(repoRoot, CONFIG_FILENAME);
+    const config = await loadConfig(configPath);
+    const configAgents = (config.agents || [])
+      .map(normalizeAgentConfig)
+      .filter(Boolean);
+
+    return configAgents;
+  }
+
+  static logMessage(message, level = 'info') {
     const prefix = {
       info: '→',
       success: '✓',
@@ -33,6 +127,10 @@ export class SkillsManager {
       warn: '⚠'
     }[level] || '•';
     console.log(`${prefix} ${message}`);
+  }
+
+  log(message, level = 'info') {
+    SkillsManager.logMessage(message, level);
   }
 
   /**
@@ -272,4 +370,135 @@ export class SkillsManager {
 
     console.log('');
   }
+}
+
+// CLI Entry Point
+async function main() {
+  const args = process.argv.slice(2);
+  
+  // If no arguments or help requested
+  if (args.length === 0 || args.includes('help') || args.includes('--help')) {
+    const agents = await SkillsManager.listAgents({
+      repoRoot: args.find(arg => arg.startsWith('--repo='))?.replace('--repo=', '')
+    });
+    const agentList = agents.length > 0
+      ? agents.map(agent => `  ${agent.name.padEnd(16, ' ')}Manage ${agent.name} skills (${agent.targetDir})`).join('\n')
+      : '  (No agents configured)';
+
+    console.log(`
+Skills Manager - Cross-platform agent skills management
+
+Usage:
+  node scripts/skills-manager.js <agent> <command> [options]
+
+Agents:
+${agentList}
+  all              Sync skills for all agents
+
+Commands:
+  sync              Create/update skill links (daily use)
+  bootstrap         Initialize with backup (first time)
+  adopt <name>      Move local skill to repo and link back
+  prune             Remove links not in repo
+  list              Show all skills and their status
+  help              Show this help message
+
+Options:
+  --repo=<path>     Specify repository root
+  --target=<path>   Specify target directory
+  --no-pull         Skip git pull
+  --prune           Remove old links during sync
+
+Examples:
+  node scripts/skills-manager.js codex sync
+  node scripts/skills-manager.js gemini bootstrap
+  node scripts/skills-manager.js codex adopt my-skill
+  node scripts/skills-manager.js claude list
+  node scripts/skills-manager.js all sync
+`);
+    return;
+  }
+
+  const agentName = args[0];
+  const command = args[1] || 'help';
+
+  if (command !== 'sync' && agentName === 'all') {
+    console.error('✗ Error: The "all" agent only supports the sync command.');
+    process.exit(1);
+  }
+
+  const repoRoot = args.find(arg => arg.startsWith('--repo='))?.replace('--repo=', '');
+  const targetDir = args.find(arg => arg.startsWith('--target='))?.replace('--target=', '');
+  const options = {
+    noPull: args.includes('--no-pull'),
+    prune: args.includes('--prune')
+  };
+
+  const agents = await SkillsManager.listAgents({ repoRoot });
+  const agentNames = agents.map(agent => agent.name);
+  const isAllAgents = agentName === 'all';
+
+  if (!isAllAgents && !agentNames.includes(agentName)) {
+    const availableAgents = agentNames.length > 0 ? agentNames.join(', ') : 'none';
+    console.error(`✗ Error: Invalid agent name "${agentName}". Available: ${availableAgents}`);
+    process.exit(1);
+  }
+
+  try {
+    if (isAllAgents) {
+      for (const agent of agents) {
+        const manager = await SkillsManager.fromConfig(agent.name, {
+          repoRoot,
+          targetDir: agent.targetDir
+        });
+        await manager.sync(options);
+      }
+      return;
+    }
+
+    const manager = await SkillsManager.fromConfig(agentName, {
+      repoRoot,
+      targetDir
+    });
+
+    switch (command) {
+      case 'sync':
+        await manager.sync(options);
+        break;
+
+      case 'bootstrap':
+        await manager.bootstrap(options);
+        break;
+
+      case 'adopt':
+        const skillName = args[2];
+        if (!skillName) {
+          console.error('✗ Error: Skill name required for adopt command');
+          console.log(`Usage: node scripts/skills-manager.js ${agentName} adopt <skill-name>`);
+          process.exit(1);
+        }
+        await manager.adopt(skillName);
+        break;
+
+      case 'prune':
+        await manager.prune();
+        break;
+
+      case 'list':
+        await manager.list();
+        break;
+
+      default:
+        console.error(`✗ Error: Unknown command "${command}"`);
+        process.exit(1);
+    }
+  } catch (error) {
+    console.error(`\n✗ Error: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+// Run if called directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
 }

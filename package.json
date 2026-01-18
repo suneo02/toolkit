@@ -4,12 +4,16 @@
   "description": "Cross-platform agent skills management",
   "type": "module",
   "scripts": {
-    "codex:sync": "node scripts/codex.js sync",
-    "codex:bootstrap": "node scripts/codex.js bootstrap",
-    "codex:adopt": "node scripts/codex.js adopt",
-    "gemini:sync": "node scripts/gemini.js sync",
-    "gemini:bootstrap": "node scripts/gemini.js bootstrap",
-    "gemini:adopt": "node scripts/gemini.js adopt"
+    "codex:sync": "node scripts/skills-manager.js codex sync",
+    "codex:bootstrap": "node scripts/skills-manager.js codex bootstrap",
+    "codex:adopt": "node scripts/skills-manager.js codex adopt",
+    "gemini:sync": "node scripts/skills-manager.js gemini sync",
+    "gemini:bootstrap": "node scripts/skills-manager.js gemini bootstrap",
+    "gemini:adopt": "node scripts/skills-manager.js gemini adopt",
+    "claude:sync": "node scripts/skills-manager.js claude sync",
+    "claude:bootstrap": "node scripts/skills-manager.js claude bootstrap",
+    "claude:adopt": "node scripts/skills-manager.js claude adopt",
+    "agents:sync": "node scripts/skills-manager.js all sync"
   },
   "keywords": [
     "agent",
