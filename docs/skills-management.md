@@ -137,19 +137,38 @@ node scripts/skills-manager.js codex bootstrap
 - 第一次设置此系统时
 - 需要完全重置时
 
-### `adopt <name>` - 技能入库
+### `adopt [name]` - 技能入库
 
-将本地创建的技能迁移到 Git 仓库管理。
+将本地创建的技能迁移到 Git 仓库管理。如果不提供技能名称，会自动从当前工作目录推断，或扫描本地技能目录。
 
 ```bash
+# 指定技能名称
 node scripts/skills-manager.js codex adopt my-skill
+
+# 自动推断（从当前目录）
+cd ~/.codex/skills/my-skill
+node scripts/skills-manager.js codex adopt
+
+# 自动选择（只有一个本地技能）
+node scripts/skills-manager.js codex adopt
+
+# 交互式选择（多个本地技能）
+node scripts/skills-manager.js codex adopt
 ```
 
 **功能**：
 
-1. 移动 `~/.codex/skills/my-skill` → 仓库 `skills/my-skill`
-2. 创建链接回 `~/.codex/skills/my-skill`
-3. 提示你提交到 Git
+1. 自动检测技能名称（从 `cwd` 或扫描本地目录）
+2. 移动 `~/.codex/skills/my-skill` → 仓库 `skills/my-skill`
+3. 创建链接回 `~/.codex/skills/my-skill`
+4. 提示你提交到 Git
+
+**自动检测规则**：
+
+- 如果当前目录在技能目标目录下，使用相对路径的第一段
+- 否则扫描目标目录中的真实目录（非链接）
+- 仅有一个候选时自动选择，多个时交互式选择
+- 非交互式环境（CI/脚本）需明确提供技能名称
 
 **何时使用**：
 
@@ -344,12 +363,15 @@ node scripts/skills-manager.js codex sync --no-pull
 | `npm run codex:sync`            | `node scripts/skills-manager.js codex sync`            |
 | `npm run codex:bootstrap`       | `node scripts/skills-manager.js codex bootstrap`       |
 | `npm run codex:adopt -- <name>` | `node scripts/skills-manager.js codex adopt <name>`    |
+| `npm run codex:adopt`          | `node scripts/skills-manager.js codex adopt` (自动检测)  |
 | `npm run gemini:sync`           | `node scripts/skills-manager.js gemini sync`           |
 | `npm run gemini:bootstrap`      | `node scripts/skills-manager.js gemini bootstrap`      |
 | `npm run gemini:adopt -- <name>`| `node scripts/skills-manager.js gemini adopt <name>`   |
+| `npm run gemini:adopt`         | `node scripts/skills-manager.js gemini adopt` (自动检测)  |
 | `npm run claude:sync`           | `node scripts/skills-manager.js claude sync`           |
 | `npm run claude:bootstrap`      | `node scripts/skills-manager.js claude bootstrap`      |
 | `npm run claude:adopt -- <name>`| `node scripts/skills-manager.js claude adopt <name>`   |
+| `npm run claude:adopt`         | `node scripts/skills-manager.js claude adopt` (自动检测)  |
 | `npm run agents:sync`           | `node scripts/skills-manager.js all sync`              |
 
 ### Agent 命令一致

@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 import { exec } from 'child_process';
-import { existsSync, lstatSync } from 'fs';
+import { existsSync, lstatSync, readFileSync } from 'fs';
 import { mkdir, readdir, readFile, rename, rm, symlink } from 'fs/promises';
 import { homedir, platform } from 'os';
-import { dirname, isAbsolute, join, resolve } from 'path';
+import { dirname, isAbsolute, join, resolve, relative, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
+import { createInterface } from 'readline';
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -77,6 +78,104 @@ async function loadConfig(configPath) {
     }
     throw error;
   }
+}
+
+/**
+ * Infer skill name from current working directory.
+ * Returns skill name if cwd is within targetDir, null otherwise.
+ */
+function inferSkillName(targetDir) {
+  const cwd = process.cwd();
+  const rel = relative(targetDir, cwd);
+
+  if (rel.startsWith('..') || isAbsolute(rel)) {
+    return null;
+  }
+
+  const segments = rel.split(sep);
+  if (segments.length > 0 && segments[0] !== '.') {
+    return segments[0];
+  }
+
+  return null;
+}
+
+/**
+ * Get local skill candidates from target directory.
+ * Returns real directories (not symlinks) that are not .system.
+ */
+async function getLocalSkillCandidates(targetDir) {
+  if (!existsSync(targetDir)) {
+    return [];
+  }
+
+  const items = await readdir(targetDir, { withFileTypes: true });
+  const candidates = [];
+
+  for (const item of items) {
+    if (item.name === '.system') {
+      continue;
+    }
+
+    if (!item.isDirectory()) {
+      continue;
+    }
+
+    const fullPath = join(targetDir, item.name);
+    const isLink = lstatSync(fullPath).isSymbolicLink();
+    if (!isLink) {
+      candidates.push(item.name);
+    }
+  }
+
+  return candidates;
+}
+
+/**
+ * Interactive selection using readline.
+ * Prompts user to select a skill from candidates.
+ */
+function interactiveSelect(candidates) {
+  return new Promise((resolve, reject) => {
+    if (!process.stdin.isTTY) {
+      reject(new Error('Non-interactive environment: please provide skill name explicitly'));
+      return;
+    }
+
+    const rl = createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    console.log('\nFound multiple local skills:');
+    candidates.forEach((name, index) => {
+      console.log(`  ${index + 1}. ${name}`);
+    });
+
+    const prompt = () => {
+      rl.question('\nSelect a skill (enter number or name): ', (input) => {
+        const trimmed = input.trim();
+        const index = parseInt(trimmed, 10);
+
+        if (!isNaN(index) && index >= 1 && index <= candidates.length) {
+          rl.close();
+          resolve(candidates[index - 1]);
+          return;
+        }
+
+        if (candidates.includes(trimmed)) {
+          rl.close();
+          resolve(trimmed);
+          return;
+        }
+
+        console.log('Invalid selection. Please try again.');
+        prompt();
+      });
+    };
+
+    prompt();
+  });
 }
 
 /**
@@ -398,7 +497,7 @@ ${agentList}
 Commands:
   sync              Create/update skill links (daily use)
   bootstrap         Initialize with backup (first time)
-  adopt <name>      Move local skill to repo and link back
+  adopt [name]      Move local skill to repo and link back (auto-detects name if not provided)
   prune             Remove links not in repo
   list              Show all skills and their status
   help              Show this help message
@@ -471,11 +570,35 @@ Examples:
         break;
 
       case 'adopt':
-        const skillName = args[2];
+        let skillName = args[2];
+
         if (!skillName) {
-          console.error('✗ Error: Skill name required for adopt command');
-          console.log(`Usage: node scripts/skills-manager.js ${agentName} adopt <skill-name>`);
-          process.exit(1);
+          console.log('No skill name provided, attempting auto-detection...\n');
+
+          skillName = inferSkillName(manager.targetDir);
+          if (skillName) {
+            console.log(`→ Using inferred skill name: "${skillName}"`);
+          } else {
+            const candidates = await getLocalSkillCandidates(manager.targetDir);
+            if (candidates.length === 0) {
+              console.error('✗ Error: No local skills found in target directory');
+              console.error(`Target: ${manager.targetDir}`);
+              console.error(`\nUsage: node scripts/skills-manager.js ${agentName} adopt <skill-name>`);
+              process.exit(1);
+            } else if (candidates.length === 1) {
+              skillName = candidates[0];
+              console.log(`→ Only one local skill found: "${skillName}"`);
+            } else {
+              try {
+                skillName = await interactiveSelect(candidates);
+                console.log(`→ Selected skill: "${skillName}"`);
+              } catch (error) {
+                console.error(`\n✗ Error: ${error.message}`);
+                console.error(`\nUsage: node scripts/skills-manager.js ${agentName} adopt <skill-name>`);
+                process.exit(1);
+              }
+            }
+          }
         }
         await manager.adopt(skillName);
         break;
