@@ -1,27 +1,33 @@
-# Skills Manager
+# Dev Learning Toolkit / 开发学习工具仓库
 
-管理 Codex/Gemini/Claude 以及自定义 Agent 的技能同步。
+这是我个人的开发学习工具仓库，用来沉淀 skills、开发流程思考与实验记录。
+This is my personal dev-learning toolkit for skills, workflow thinking, and experiments.
 
-## 基本用法
+## What's Inside / 内容地图
+- **Skills**: AI/agent 的能力模块与规则集合（见 `skills/`，同步方式见 `docs/skills-management.md`）
+- **Workflow notes**: 开发流程/协作/规划方法的思考（见 `docs/coding-process/gpt.md`、`docs/coding-process/gpt2.md`、`docs/coding-process/grok.md`、`docs/coding-process/grok2.md`）
+- **Repo rules for agents**: 仓库级工作约束（见 `AGENTS.md`）
 
-```bash
-# 初始化
-node scripts/skills-manager.js codex bootstrap
-node scripts/skills-manager.js gemini bootstrap
-node scripts/skills-manager.js claude bootstrap
+## Core Ideas / 核心原则
+- **Contract-first**: 先明确目标/约束/验收，再进入实现
+- **Todo-driven**: 拆成可提交的 todo，并为每条绑定验证方式
+- **Parallel explore**: 用探索与资料检索并行补齐现实证据
+- **Verify early**: 每步都要验证，避免"最后发现全错"
+- **Living docs**: 文档是可演进的执行记录，不是一次性的长文
 
-# 同步
-node scripts/skills-manager.js codex sync
-node scripts/skills-manager.js gemini sync
-node scripts/skills-manager.js claude sync
+## Docs / 文档入口
+- **Skills management**: [docs/skills-management.md](docs/skills-management.md)
+- **Coding process**: [docs/coding-process/gpt.md](docs/coding-process/gpt.md)
+- **Coding process (alt)**: [docs/coding-process/gpt2.md](docs/coding-process/gpt2.md)
+- **Coding process (alt)**: [docs/coding-process/grok.md](docs/coding-process/grok.md)
+- **Coding process (alt)**: [docs/coding-process/grok2.md](docs/coding-process/grok2.md)
+- **Agent rules**: [AGENTS.md](AGENTS.md)
 
-# 一键同步
-node scripts/skills-manager.js all sync
+## How I Use This Repo / 我的使用方式
+- 先写契约式需求（目标、约束、验收）
+- 并行探索代码与资料，更新 todo
+- 按 todo 实施与验证
+- 将关键结论沉淀到文档中
 
-# 列表
-node scripts/skills-manager.js codex list
-```
-
-## 配置
-
-使用仓库根目录的 `skills-manager.config.json` 定义 Agent 和目标目录。
+## Language / 语言策略
+- 中文为主，English for skills/rules for better AI parsing.
