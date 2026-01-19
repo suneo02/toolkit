@@ -21,12 +21,14 @@ cd ~/Documents/suneo-toolkit
 ### 2. Stow Configuration
 ```bash
 cd dotfiles
-stow -t ~ opencode
+stow -t ~/.config/opencode opencode
 ```
 
 This creates:
 ```
-~/.config/opencode -> ~/Documents/suneo-toolkit/dotfiles/opencode/.config/opencode
+~/.config/opencode/opencode.json -> ~/Documents/suneo-toolkit/dotfiles/opencode/opencode.json
+~/.config/opencode/oh-my-opencode.json -> ~/Documents/suneo-toolkit/dotfiles/opencode/oh-my-opencode.json
+~/.config/opencode/package.json -> ~/Documents/suneo-toolkit/dotfiles/opencode/package.json
 ```
 
 ### 3. Install OpenCode
@@ -42,7 +44,10 @@ opencode auth openai
 ### 5. Verify
 ```bash
 opencode doctor
-ls -la ~/.config/opencode/
+ls -la ~/.config/opencode
+readlink ~/.config/opencode/opencode.json
+readlink ~/.config/opencode/oh-my-opencode.json
+readlink ~/.config/opencode/package.json
 ```
 
 ## Maintenance
@@ -66,25 +71,28 @@ git pull
 ### Remove Symlinks
 ```bash
 cd ~/Documents/suneo-toolkit/dotfiles
-stow -D -t ~ opencode
+stow -D -t ~/.config/opencode opencode
 ```
 
 ### Re-apply Symlinks (after repo move/update)
 ```bash
 cd ~/Documents/suneo-toolkit/dotfiles
-stow -R -t ~ opencode
+stow -R -t ~/.config/opencode opencode
 ```
 
 ## Troubleshooting
 
 ### Stow reports conflicts
 ```bash
-# Backup existing config
-mv ~/.config/opencode ~/.config/opencode.backup
+# Backup existing files
+mkdir -p ~/.config/opencode.backup
+mv ~/.config/opencode/opencode.json ~/.config/opencode.backup/
+mv ~/.config/opencode/oh-my-opencode.json ~/.config/opencode.backup/
+mv ~/.config/opencode/package.json ~/.config/opencode.backup/
 
 # Try again
 cd ~/Documents/suneo-toolkit/dotfiles
-stow -t ~ opencode
+stow -t ~/.config/opencode opencode
 ```
 
 ### Auth.json missing
@@ -96,5 +104,7 @@ opencode auth openai
 ### Check symlink status
 ```bash
 ls -la ~/.config/opencode
-readlink ~/.config/opencode
+readlink ~/.config/opencode/opencode.json
+readlink ~/.config/opencode/oh-my-opencode.json
+readlink ~/.config/opencode/package.json
 ```

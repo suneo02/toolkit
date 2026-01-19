@@ -7,8 +7,9 @@ This directory contains configuration files managed with GNU Stow.
 ```
 dotfiles/
 └── opencode/          # OpenCode configuration package
-    └── .config/
-        └── opencode/  # Will be symlinked to ~/.config/opencode
+    ├── opencode.json
+    ├── oh-my-opencode.json
+    └── package.json
 ```
 
 ## Usage
@@ -16,20 +17,20 @@ dotfiles/
 ### Install configurations:
 ```bash
 cd ~/Documents/suneo-toolkit/dotfiles
-stow opencode
+stow -t ~/.config/opencode opencode
 ```
 
 ### Remove configurations:
 ```bash
 cd ~/Documents/suneo-toolkit/dotfiles
-stow -D opencode
+stow -D -t ~/.config/opencode opencode
 ```
 
 ### Restow (useful after updates):
 ```bash
 cd ~/Documents/suneo-toolkit/dotfiles
-stow -R opencode
+stow -R -t ~/.config/opencode opencode
 ```
 
 ## See Also
-- [OpenCode Configuration README](opencode/.config/opencode/README.md)
+- [OpenCode Configuration README](opencode/README.md)
