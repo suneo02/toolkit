@@ -31,7 +31,11 @@ dotfiles/
 ### 1. Install Chezmoi
 
 ```bash
-npm run dotfiles:install
+# macOS
+brew install chezmoi
+
+# Linux
+sh -c "$(curl -fsLS get.chezmoi.io)"
 ```
 
 ### 2. Apply Configuration
@@ -68,7 +72,7 @@ npm run dotfiles -- apply -v
 
 VSCode settings are managed via a shared template.
 
-- Source: `dotfiles/.shared/vscode-settings.json`
+- Source: `dotfiles/.shared/vscode-settings.json.tmpl`
 - Targets: Mapped to correct paths on Windows, macOS, and Linux automatically.
 
-To update VSCode settings, edit `dotfiles/.shared/vscode-settings.json` and run `npm run dotfiles -- apply`.
+To update VSCode settings, edit `dotfiles/.shared/vscode-settings.json.tmpl` and run `npm run dotfiles -- apply`.

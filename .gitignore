@@ -3,7 +3,6 @@ node_modules/
 *.log
 .DS_Store
 
-# OpenCode sensitive files (managed by stow)
-dotfiles/opencode/.config/opencode/auth.json
-dotfiles/opencode/.config/opencode/bun.lock
-dotfiles/opencode/.config/opencode/.gitignore
+# Temporary or sensitive files
+**/*.lock
+**/.DS_Store
