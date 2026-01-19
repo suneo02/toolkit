@@ -1,36 +1,74 @@
-# Dotfiles
+# Suneo Toolkit Dotfiles
 
-This directory contains configuration files managed with GNU Stow.
+Managed with [Chezmoi](https://www.chezmoi.io/).
 
 ## Structure
 
-```
+The `dotfiles` directory acts as the source state for Chezmoi.
+
+```text
 dotfiles/
-└── opencode/          # OpenCode configuration package
-    ├── opencode.json
-    ├── oh-my-opencode.json
-    └── package.json
+├── .shared/                  # Shared configuration files (not directly applied)
+│   └── vscode-settings.json
+├── dot_config/               # ~/.config/
+│   ├── opencode/             # OpenCode configuration
+│   └── Code/                 # VSCode (Linux)
+├── Library/                  # ~/Library/ (macOS)
+│   └── Application Support/
+│       └── Code/
+│           └── User/
+│               └── settings.json.tmpl
+├── AppData/                  # %APPDATA% (Windows)
+│   └── Roaming/
+│       └── Code/
+│           └── User/
+│               └── settings.json.tmpl
+└── ...
 ```
 
-## Usage
+## Quick Start
 
-### Install configurations:
+### 1. Install Chezmoi
+
 ```bash
-cd ~/Documents/suneo-toolkit/dotfiles
-stow -t ~/.config/opencode opencode
+npm run dotfiles:install
 ```
 
-### Remove configurations:
+### 2. Apply Configuration
+
+Use the helper script to apply configurations to your home directory:
+
 ```bash
-cd ~/Documents/suneo-toolkit/dotfiles
-stow -D -t ~/.config/opencode opencode
+npm run dotfiles -- apply -v
 ```
 
-### Restow (useful after updates):
+## Managing Files
+
+### Add a new file
+
 ```bash
-cd ~/Documents/suneo-toolkit/dotfiles
-stow -R -t ~/.config/opencode opencode
+# Add ~/.zshrc to dotfiles
+npm run dotfiles -- add ~/.zshrc
 ```
 
-## See Also
-- [OpenCode Configuration README](opencode/README.md)
+### Edit a file
+
+```bash
+# Edit managed files in the source directory
+npm run dotfiles -- edit ~/.zshrc
+```
+
+### Apply changes
+
+```bash
+npm run dotfiles -- apply -v
+```
+
+## VSCode Settings
+
+VSCode settings are managed via a shared template.
+
+- Source: `dotfiles/.shared/vscode-settings.json`
+- Targets: Mapped to correct paths on Windows, macOS, and Linux automatically.
+
+To update VSCode settings, edit `dotfiles/.shared/vscode-settings.json` and run `npm run dotfiles -- apply`.
