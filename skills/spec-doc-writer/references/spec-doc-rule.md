@@ -13,6 +13,17 @@ docs/specs/<task>/
 - **implementation-plan.json**：todo 列表 + 验证方式
 - **spec-design.md**（可选）：技术方案、组件复用
 
+## 轻量级模式（单文件）
+
+当任务简单（预期修改文件数 < 3 或 步骤 < 5）时，可合并为单个 `spec.md`：
+
+docs/specs/<task>/spec.md
+
+结构包含：
+1. **Contract**: 目标/约束/验收
+2. **Design**: (可选) 方案
+3. **Plan**: 包含验证方式的 Todo 列表 (Markdown Checkbox)
+
 ## Contract Spec 要求
 
 只写不易过时的内容：
