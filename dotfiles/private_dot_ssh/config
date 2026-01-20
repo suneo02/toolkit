@@ -1,0 +1,23 @@
+Host github
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_github_personal
+    IdentitiesOnly yes
+
+Host gitee
+    HostName gitee.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_gitee_personal
+    IdentitiesOnly yes
+
+Host gitee_suneo
+    HostName gitee.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_gitee_suneo
+    IdentitiesOnly yes
+
+Host github_suneo
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa_github_suneo
+    IdentitiesOnly yes

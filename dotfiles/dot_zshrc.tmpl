@@ -1,0 +1,65 @@
+# Environment Variables & PATH
+# ==========================
+
+# General PATH additions
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/sbin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# NVM (Node Version Manager)
+export NVM_DIR="$HOME/.nvm"
+
+# pnpm
+export PNPM_HOME="{{ .chezmoi.homeDir }}/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# Homebrew Bottles mirror
+export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles
+
+# Proxy settings
+export http_proxy=http://127.0.0.1:7897
+export https_proxy=http://127.0.0.1:7897
+
+# Windsurf/Codeium
+export PATH="{{ .chezmoi.homeDir }}/.codeium/windsurf/bin:$PATH"
+
+# Rust (Cargo)
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
+# Tool Initialization
+# ===================
+
+# NVM (Node Version Manager)
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
+# iTerm2 Shell Integration
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+# Kiro Shell Integration
+if [[ "$TERM_PROGRAM" == "kiro" ]]; then
+  kiro_shell_rc="$(kiro --locate-shell-integration-path zsh 2>/dev/null)"
+  [[ -n "$kiro_shell_rc" && -r "$kiro_shell_rc" ]] && . "$kiro_shell_rc"
+fi
+
+# zoxide (Smarter cd command)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+# fzf (Fuzzy finder)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Aliases
+# =======
+alias ovault='open "obsidian://open?vault=$(basename "$(pwd)")"'
+alias typora="open -a Typora"
+# bun completions
+[ -s "{{ .chezmoi.homeDir }}/.bun/_bun" ] && source "{{ .chezmoi.homeDir }}/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

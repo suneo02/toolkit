@@ -62,6 +62,13 @@ npm run dotfiles -- add ~/.zshrc
 npm run dotfiles -- edit ~/.zshrc
 ```
 
+### Check changes
+
+```bash
+# Check diff between source and target
+npm run dotfiles -- diff
+```
+
 ### Apply changes
 
 ```bash
