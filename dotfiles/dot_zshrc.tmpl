@@ -6,6 +6,11 @@ export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 export PATH="/opt/homebrew/sbin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+# Context7 MCP API key (loaded from separate file)
+if [ -f "$HOME/.config/context7.env" ]; then
+  source "$HOME/.config/context7.env"
+fi
+
 # NVM (Node Version Manager)
 export NVM_DIR="$HOME/.nvm"
 
@@ -23,11 +28,8 @@ export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottl
 export http_proxy=http://127.0.0.1:7897
 export https_proxy=http://127.0.0.1:7897
 
-# Windsurf/Codeium
-export PATH="{{ .chezmoi.homeDir }}/.codeium/windsurf/bin:$PATH"
-
-# Rust (Cargo)
-[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+# Antigravity
+export PATH="{{ .chezmoi.homeDir }}/.antigravity/antigravity/bin:$PATH"
 
 # Tool Initialization
 # ===================
@@ -39,12 +41,6 @@ export PATH="{{ .chezmoi.homeDir }}/.codeium/windsurf/bin:$PATH"
 # iTerm2 Shell Integration
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-# Kiro Shell Integration
-if [[ "$TERM_PROGRAM" == "kiro" ]]; then
-  kiro_shell_rc="$(kiro --locate-shell-integration-path zsh 2>/dev/null)"
-  [[ -n "$kiro_shell_rc" && -r "$kiro_shell_rc" ]] && . "$kiro_shell_rc"
-fi
-
 # zoxide (Smarter cd command)
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
@@ -55,8 +51,7 @@ fi
 
 # Aliases
 # =======
-alias ovault='open "obsidian://open?vault=$(basename "$(pwd)")"'
-alias typora="open -a Typora"
+
 # bun completions
 [ -s "{{ .chezmoi.homeDir }}/.bun/_bun" ] && source "{{ .chezmoi.homeDir }}/.bun/_bun"
 
