@@ -1,6 +1,6 @@
 ---
 name: spec-doc-writer
-description: Contract-first spec writing for task planning. Use when breaking down tasks into contract (goals/constraints/acceptance) and execution plan (todos with validation). Creates spec-contract.md and implementation-plan.json under docs/specs/<task>/. Follow references/spec-doc-rule.md for contract-first principles.
+description: Contract-first spec writing for task planning. Use when breaking down tasks into contract (goals/constraints/acceptance) and execution plan (todos with validation). Creates spec-contract.md and implementation-plan.json (or single spec.md for simple tasks) under docs/specs/<task>/. Follow references/spec-doc-rule.md for contract-first principles.
 ---
 
 # Spec Doc Writer
@@ -13,11 +13,12 @@ Create contract-first spec docs under docs/specs/<task>/ following contract-firs
 
 1. Collect inputs: task name, goals, constraints, acceptance criteria, key risks
 2. **Reuse Check**: Search existing components/patterns before defining new solutions
-3. Create spec-contract.md: goals, non-goals, constraints, acceptance, risks (no implementation details)
-4. Create implementation-plan.json: todos with validation methods (all status: "failed" initially)
-5. (Optional) Create spec-design.md: technical approach, reused components, exploration findings
-6. Validate: check against references/spec-doc-rule.md; ensure todos have validation methods
-7. Output: report created files and validation plan
+3. **Mode Selection**: Simple task (< 3 files/steps)? Use Single File Mode (spec.md). Complex? Use Multi-File Mode.
+4. Create Docs:
+   - **Multi-File**: spec-contract.md + implementation-plan.json + optional spec-design.md
+   - **Single-File**: spec.md containing Contract, Design (optional), and Plan sections
+5. Validate: check against references/spec-doc-rule.md; ensure todos have validation methods
+6. Output: report created files and validation plan
 
 ## Key Principles
 
