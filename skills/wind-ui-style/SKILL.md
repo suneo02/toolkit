@@ -19,11 +19,12 @@ description: Style and design work for projects using the Wind UI component libr
 1. Scan existing styles and tokens before creating new ones; prefer extending or mixing in shared patterns.
 2. Define the BEM block and state modifiers first; map elements and variants.
 3. Implement base styles, then modifiers; keep selectors shallow and scoped to the block.
-4. Replace hardcoded values with Wind UI CSS variables from the reference; do not invent variable names. If no suitable variable exists, use a Less variable with a literal fallback (or a project-level CSS variable if defined).
+4. Replace hardcoded values with Wind UI CSS variables from the reference; do not invent variable names. If no suitable variable exists, look up shared tokens in `packages/gel-ui/src/styles/shared/variables.less` and import them via `@import 'gel-ui/variables.less';`. If still missing, use a Less variable with a literal fallback (or a project-level CSS variable if defined).
 
 ## Variable Reference (EN)
 - Load `reference/wind-ui-vars.css` for the authoritative CSS variable list.
 - If the file is missing and precise variable names matter, ask the user to provide the reference.
+- For shared Less tokens, check `packages/gel-ui/src/styles/shared/variables.less` and import with `@import 'gel-ui/variables.less';`.
 
 ## Spacing Without gap (EN)
 - Use sibling selectors: `> * + * { margin-left: @space; }` or `margin-top` for vertical stacks.
