@@ -245,6 +245,18 @@ export class SkillsManager {
   }
 
   /**
+   * Check if a path exists (including broken symlinks)
+   */
+  pathExists(path) {
+    try {
+      lstatSync(path);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Create a symlink (Unix) or junction (Windows)
    */
   async createLink(target, linkPath) {
@@ -302,14 +314,20 @@ export class SkillsManager {
     for (const skill of skills) {
       const linkPath = join(this.targetDir, skill.name);
 
-      if (existsSync(linkPath)) {
+      if (this.pathExists(linkPath)) {
         const isLink = await this.isLink(linkPath);
         if (isLink) {
-          this.log(`Skip: ${skill.name} (already linked)`, 'info');
+          if (!existsSync(linkPath)) {
+            await rm(linkPath, { recursive: true, force: true });
+            this.log(`Removed: ${skill.name} (broken link)`, 'warn');
+          } else {
+            this.log(`Skip: ${skill.name} (already linked)`, 'info');
+            continue;
+          }
         } else {
           this.log(`Skip: ${skill.name} (real directory exists)`, 'warn');
+          continue;
         }
-        continue;
       }
 
       await this.createLink(skill.path, linkPath);
@@ -347,7 +365,7 @@ export class SkillsManager {
     // Backup existing directories
     for (const skill of skills) {
       const targetPath = join(this.targetDir, skill.name);
-      if (existsSync(targetPath)) {
+      if (this.pathExists(targetPath)) {
         const backupPath = join(backupDir, skill.name);
         this.log(`Backing up: ${skill.name}`, 'warn');
         await rename(targetPath, backupPath);

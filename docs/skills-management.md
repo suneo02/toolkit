@@ -117,6 +117,7 @@ node scripts/skills-manager.js codex sync --prune
 1. 执行 `git pull` 获取最新仓库内容
 2. 为所有仓库中的技能创建链接
 3. 跳过已存在的真实目录（不会覆盖）
+4. 自动清理断开的链接并重新创建
 
 ### `bootstrap` - 初始化
 
