@@ -36,7 +36,7 @@ Use this skill to maintain interview question content in the knowledge base whil
 
 ## Scripts
 
-- Run `python3 /Users/hidetoshidekisugi/Documents/suneo-agent-skills/skills/interview-question-library/scripts/audit_interview_library.py --root library [paths...]` to audit naming, indexes, H1 count, relative links, and length.
+- Run `python3 skills/interview-question-library/scripts/audit_interview_library.py --root library [paths...]` to audit naming, indexes, H1 count, relative links, and length.
 
 ## References
 

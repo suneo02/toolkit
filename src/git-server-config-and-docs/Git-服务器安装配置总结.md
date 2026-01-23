@@ -64,8 +64,8 @@ git config --global http.receivepack true
 
 1.  **创建 `fcgiwrap` 服务文件**:
     复制 `config_templates/homebrew.mxcl.fcgiwrap.plist.template` 文件，重命名为 `homebrew.mxcl.fcgiwrap.plist`，并修改其中的日志路径占位符：
-    -   `<string>/Users/hidetoshidekisugi/Library/Logs/fcgiwrap/fcgiwrap.out.log</string>`
-    -   `<string>/Users/hidetoshidekisugi/Library/Logs/fcgiwrap/fcgiwrap.err.log</string>`
+    -   `<string>/Users/<your-user>/Library/Logs/fcgiwrap/fcgiwrap.out.log</string>`
+    -   `<string>/Users/<your-user>/Library/Logs/fcgiwrap/fcgiwrap.err.log</string>`
     
     完成后，将此文件移动到 `~/Library/LaunchAgents/` 目录下。
 
