@@ -17,6 +17,17 @@ description: Cross-platform skills management system for Codex, Gemini, and Clau
 - ✅ Git 管理 - 多机同步无缝
 - ✅ 可配置 - Agent 目录与扩展可配置
 
+## 目录结构
+
+技能按用途分组，仓库结构如下：
+
+```
+skills/
+├── company/   # 公司项目相关
+├── personal/  # 面试/个人内容
+└── general/   # 通识与业界标准
+```
+
 ## 快速开始
 
 ### 首次使用
@@ -141,10 +152,14 @@ node scripts/skills-manager.js codex bootstrap
 ### `adopt [name]` - 技能入库
 
 将本地创建的技能迁移到 Git 仓库管理。如果不提供技能名称，会自动从当前工作目录推断，或扫描本地技能目录。
+默认写入 `skills/general/`，可用 `--group` 指定其他分组。
 
 ```bash
 # 指定技能名称
 node scripts/skills-manager.js codex adopt my-skill
+
+# 指定分组（company/personal/general）
+node scripts/skills-manager.js codex adopt my-skill --group=company
 
 # 自动推断（从当前目录）
 cd ~/.codex/skills/my-skill
