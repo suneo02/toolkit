@@ -42,12 +42,12 @@ Commands:
 Options:
   --repo=<path>     Specify repository root
   --target=<path>   Specify target directory
-  --group=<name>    Adopt target group (company, personal, general)
-  --no-pull         Skip git pull
+  --group=<name>    Sync groups / adopt group (company, personal, general)
   --prune           Remove old links during sync
 
 Examples:
   node scripts/skills-manager.js codex sync
+  node scripts/skills-manager.js codex sync --group=company
   node scripts/skills-manager.js gemini bootstrap
   node scripts/skills-manager.js codex adopt my-skill
   node scripts/skills-manager.js claude list
@@ -67,11 +67,16 @@ Examples:
   const repoRoot = args.find(arg => arg.startsWith('--repo='))?.replace('--repo=', '')
     || resolve(__dirname, '../..');
   const targetDir = args.find(arg => arg.startsWith('--target='))?.replace('--target=', '');
-  const groupArg = args.find(arg => arg.startsWith('--group='));
-  const group = groupArg ? groupArg.replace('--group=', '') : null;
+  const groupArgs = args.filter(arg => arg.startsWith('--group='));
+  const groups = [...new Set(
+    groupArgs
+      .flatMap(arg => arg.replace('--group=', '').split(','))
+      .map(group => group.trim())
+      .filter(Boolean)
+  )];
   const options = {
-    noPull: args.includes('--no-pull'),
-    prune: args.includes('--prune')
+    prune: args.includes('--prune'),
+    groups: groups.length > 0 ? groups : undefined
   };
 
   const agents = await SkillsManager.listAgents({ repoRoot });
@@ -111,6 +116,10 @@ Examples:
         break;
 
       case 'adopt': {
+        if (groups.length > 1) {
+          console.error('✗ Error: The adopt command only supports a single --group value.');
+          process.exit(1);
+        }
         let skillName = args[2];
 
         if (!skillName) {
@@ -141,7 +150,7 @@ Examples:
             }
           }
         }
-        await manager.adopt(skillName, { group });
+        await manager.adopt(skillName, { group: groups[0] || null });
         break;
       }
 

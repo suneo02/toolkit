@@ -67,8 +67,8 @@ export class SkillsManager {
     await createLink(target, linkPath);
   }
 
-  async getRepoSkills() {
-    return getRepoSkills(this.repoSkillsDir);
+  async getRepoSkills(options = {}) {
+    return getRepoSkills(this.repoSkillsDir, options);
   }
 
   async listTargetItems() {

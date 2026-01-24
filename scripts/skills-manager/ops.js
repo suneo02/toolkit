@@ -1,29 +1,19 @@
-import { exec } from 'child_process';
 import { existsSync } from 'fs';
 import { mkdir, rename, rm } from 'fs/promises';
 import { join } from 'path';
-import { promisify } from 'util';
 import { SKILL_GROUPS } from './constants.js';
-
-const execAsync = promisify(exec);
 
 export async function syncSkills(manager, options = {}) {
   manager.log(`Syncing ${manager.agentName} skills...`);
   manager.log(`Repo: ${manager.repoRoot}`);
   manager.log(`Target: ${manager.targetDir}`);
+  if (options.groups && options.groups.length > 0) {
+    manager.log(`Groups: ${options.groups.join(', ')}`);
+  }
 
   await mkdir(manager.targetDir, { recursive: true });
 
-  if (!options.noPull) {
-    try {
-      await execAsync('git pull', { cwd: manager.repoRoot });
-      manager.log('Git pull completed', 'success');
-    } catch {
-      manager.log('Git pull skipped (not a git repo or git not found)', 'warn');
-    }
-  }
-
-  const skills = await manager.getRepoSkills();
+  const skills = await manager.getRepoSkills({ groups: options.groups });
 
   for (const skill of skills) {
     const linkPath = join(manager.targetDir, skill.name);
@@ -49,7 +39,11 @@ export async function syncSkills(manager, options = {}) {
   }
 
   if (options.prune) {
-    await manager.prune(skills.map(s => s.name));
+    if (options.groups && options.groups.length > 0) {
+      await manager.prune();
+    } else {
+      await manager.prune(skills.map(s => s.name));
+    }
   }
 
   manager.log('Sync completed!', 'success');
