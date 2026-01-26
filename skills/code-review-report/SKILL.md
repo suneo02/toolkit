@@ -50,5 +50,5 @@ All output in Chinese
 `scripts/generate-diff-report.js` generates AI-friendly diff summaries for review input:
 
 ```bash
-node skills/code-review-report/scripts/generate-diff-report.js --base develop --head HEAD --repo . --out-dir /diff-report
+node skills/code-review-report/scripts/generate-diff-report.cjs --base develop --out-dir ./diff-report
 ```
