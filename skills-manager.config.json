@@ -11,6 +11,10 @@
     {
       "name": "claude",
       "targetDir": "~/.claude/skills"
+    },
+    {
+      "name": "cursor",
+      "targetDir": "~/.cursor/skills"
     }
   ]
 }
