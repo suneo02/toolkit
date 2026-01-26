@@ -13,8 +13,7 @@
     "claude:sync": "node scripts/skills-manager.js claude sync",
     "claude:bootstrap": "node scripts/skills-manager.js claude bootstrap",
     "claude:adopt": "node scripts/skills-manager.js claude adopt",
-    "agents:sync": "node scripts/skills-manager.js all sync",
-    "dotfiles": "bash scripts/manage-dotfiles.sh"
+    "agents:sync": "node scripts/skills-manager.js all sync"
   },
   "keywords": [
     "agent",

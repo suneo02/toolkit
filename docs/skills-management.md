@@ -17,6 +17,17 @@ description: Cross-platform skills management system for Codex, Gemini, and Clau
 - ✅ Git 管理 - 多机同步无缝
 - ✅ 可配置 - Agent 目录与扩展可配置
 
+## 目录结构
+
+技能按用途分组，仓库结构如下：
+
+```
+skills/
+├── company/   # 公司项目相关
+├── personal/  # 面试/个人内容
+└── general/   # 通识与业界标准
+```
+
 ## 快速开始
 
 ### 首次使用
@@ -53,7 +64,7 @@ node scripts/skills-manager.js codex list
 node scripts/skills-manager.js codex adopt my-new-skill
 
 # 提交到 Git
-git add skills/my-new-skill
+git add skills/general/my-new-skill
 git commit -m "Add: my-new-skill"
 git push
 ```
@@ -67,12 +78,13 @@ git push
 ```bash
 # 机器 A - 创建并推送新技能
 node scripts/skills-manager.js codex adopt awesome-skill
-git add skills/awesome-skill
+git add skills/general/awesome-skill
 git commit -m "Add: awesome-skill"
 git push
 
 # 机器 B - 拉取并同步
-node scripts/skills-manager.js codex sync  # 自动 git pull 并创建链接
+git pull
+node scripts/skills-manager.js codex sync
 ```
 
 ### 工作流 2: 定期维护
@@ -105,8 +117,11 @@ node scripts/skills-manager.js codex list
 # 基础用法
 node scripts/skills-manager.js codex sync
 
-# 跳过 git pull
-node scripts/skills-manager.js codex sync --no-pull
+# 只同步指定分组（company/personal/general）
+node scripts/skills-manager.js codex sync --group=company
+
+# 同步多个分组（逗号分隔）
+node scripts/skills-manager.js codex sync --group=company,personal
 
 # 同时清理无效链接
 node scripts/skills-manager.js codex sync --prune
@@ -114,10 +129,11 @@ node scripts/skills-manager.js codex sync --prune
 
 **功能**：
 
-1. 执行 `git pull` 获取最新仓库内容
-2. 为所有仓库中的技能创建链接
-3. 跳过已存在的真实目录（不会覆盖）
-4. 自动清理断开的链接并重新创建
+1. 为仓库中的技能创建链接（可用 `--group` 过滤）
+2. 跳过已存在的真实目录（不会覆盖）
+3. 自动清理断开的链接并重新创建
+
+`--prune` 会按“整个仓库”清理（不受 `--group` 过滤影响），避免误删其他分组已链接的技能。
 
 ### `bootstrap` - 初始化
 
@@ -141,10 +157,15 @@ node scripts/skills-manager.js codex bootstrap
 ### `adopt [name]` - 技能入库
 
 将本地创建的技能迁移到 Git 仓库管理。如果不提供技能名称，会自动从当前工作目录推断，或扫描本地技能目录。
+默认写入 `skills/general/`，可用 `--group` 指定其他分组。
+注意：`sync` 的 `--group` 是“过滤要同步的分组”；`adopt` 的 `--group` 是“目标分组”（只能指定一个）。
 
 ```bash
 # 指定技能名称
 node scripts/skills-manager.js codex adopt my-skill
+
+# 指定分组（company/personal/general）
+node scripts/skills-manager.js codex adopt my-skill --group=company
 
 # 自动推断（从当前目录）
 cd ~/.codex/skills/my-skill
@@ -160,7 +181,7 @@ node scripts/skills-manager.js codex adopt
 **功能**：
 
 1. 自动检测技能名称（从 `cwd` 或扫描本地目录）
-2. 移动 `~/.codex/skills/my-skill` → 仓库 `skills/my-skill`
+2. 移动 `~/.codex/skills/my-skill` → 仓库 `skills/<group>/my-skill`（默认 `general`）
 3. 创建链接回 `~/.codex/skills/my-skill`
 4. 提示你提交到 Git
 
@@ -216,7 +237,7 @@ node scripts/skills-manager.js codex help
 node scripts/skills-manager.js all sync
 ```
 
-支持 `--no-pull` 和 `--prune`，作用于所有 Agent。
+支持 `--prune`，作用于所有 Agent。
 
 ## 高级用法
 
@@ -347,12 +368,13 @@ sudo yum install nodejs  # CentOS/RHEL
 chmod +x scripts/*.js
 ```
 
-### 问题 3: Git pull 失败
+### 问题 3: 需要同步最新仓库内容
 
-如果不想自动 pull，可以使用 `--no-pull` 参数：
+本脚本不会自动执行 `git pull`。如果你想获取最新技能，请先在仓库根目录手动运行：
 
 ```bash
-node scripts/skills-manager.js codex sync --no-pull
+git pull
+node scripts/skills-manager.js codex sync
 ```
 
 ## 参考资料

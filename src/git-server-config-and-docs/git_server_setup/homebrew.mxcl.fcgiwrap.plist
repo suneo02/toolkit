@@ -15,8 +15,8 @@
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/Users/hidetoshidekisugi/Library/Logs/fcgiwrap/fcgiwrap.out.log</string>
+    <string>/Users/<your-user>/Library/Logs/fcgiwrap/fcgiwrap.out.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/hidetoshidekisugi/Library/Logs/fcgiwrap/fcgiwrap.err.log</string>
+    <string>/Users/<your-user>/Library/Logs/fcgiwrap/fcgiwrap.err.log</string>
 </dict>
 </plist>
