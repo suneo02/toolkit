@@ -67,3 +67,9 @@ docs/specs/<task>/spec.md
 - 避免大段代码（< 10 行）
 - 使用绝对路径或 @see 引用
 - 状态更新：原子提交
+
+## 归档规范
+
+- 归档时机：任务完成或关闭后
+- 归档位置：源目录 **/docs/specs/archive/YYYY-MM/<task>
+- 详情与脚本用法：references/archive.md
