@@ -26,15 +26,15 @@ function parseArgs(argv) {
     repos: [],
     skillsDir: '.agent/skills',
     skillNames: [],
-    prune: false,
+    cleanBroken: false,
     force: false,
     dryRun: false
   };
 
   for (const raw of argv) {
-    if (raw === '--prune') args.prune = true;
-    else if (raw === '--force') args.force = true;
+    if (raw === '--force') args.force = true;
     else if (raw === '--dry-run') args.dryRun = true;
+    else if (raw === '--clean-broken') args.cleanBroken = true;
     else if (raw.startsWith('--agent=')) args.agent = raw.slice('--agent='.length);
     else if (raw.startsWith('--target=')) args.target = raw.slice('--target='.length);
     else if (raw.startsWith('--repo=')) args.repos.push(raw.slice('--repo='.length));
@@ -70,7 +70,7 @@ Options:
   --skills-dir=<path>     Skills root relative to repo (default: .agent/skills)
   --skill=<name>          Only link one skill by name (repeatable)
   --skills=<a,b,c>        Only link specific skill names (comma-separated)
-  --prune                 Remove managed links that are no longer present
+  --clean-broken          Remove broken symlinks in target dir (safe)
   --force                 Replace existing links pointing elsewhere
   --dry-run               Print planned actions without changing filesystem
 `);
@@ -97,12 +97,22 @@ function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
 
-function exists(p) {
+function existsFollow(p) {
   try {
     fs.accessSync(p);
     return true;
   } catch {
     return false;
+  }
+}
+
+function entryExists(p) {
+  try {
+    fs.lstatSync(p);
+    return true;
+  } catch (error) {
+    if (error.code === 'ENOENT') return false;
+    throw error;
   }
 }
 
@@ -123,7 +133,7 @@ function scanAllSkills(skillsRoot) {
     if (entry.name.startsWith('.')) continue;
 
     const directSkill = path.join(skillsRoot, entry.name, 'SKILL.md');
-    if (exists(directSkill)) {
+    if (existsFollow(directSkill)) {
       found.push({
         name: entry.name,
         dir: path.join(skillsRoot, entry.name)
@@ -138,34 +148,13 @@ function scanAllSkills(skillsRoot) {
       if (sub.name.startsWith('.')) continue;
       const skillDir = path.join(groupDir, sub.name);
       const skillMd = path.join(skillDir, 'SKILL.md');
-      if (exists(skillMd)) {
+      if (existsFollow(skillMd)) {
         found.push({ name: sub.name, dir: skillDir });
       }
     }
   }
 
   return found;
-}
-
-function loadState(statePath) {
-  try {
-    const raw = fs.readFileSync(statePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return null;
-    if (!parsed.entries || typeof parsed.entries !== 'object') return null;
-    return parsed;
-  } catch (error) {
-    if (error.code === 'ENOENT') return null;
-    return null;
-  }
-}
-
-function writeState(statePath, state, dryRun) {
-  if (dryRun) {
-    console.log(`DRY-RUN: write state ${statePath}`);
-    return;
-  }
-  fs.writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
 }
 
 function createSymlink(target, linkPath, dryRun) {
@@ -193,6 +182,18 @@ function resolveReal(p) {
   }
 }
 
+function cleanBrokenSymlinks(targetDir, dryRun) {
+  const removed = [];
+  for (const entry of listDirSafe(targetDir)) {
+    const p = path.join(targetDir, entry.name);
+    if (!isSymlink(p)) continue;
+    if (existsFollow(p)) continue; // not broken
+    removePath(p, dryRun);
+    removed.push(p);
+  }
+  return removed;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
@@ -209,7 +210,6 @@ async function main() {
 
   ensureDir(targetDir);
 
-  const statePath = path.join(targetDir, '.agent-skills-union-state.json');
   const selectedNames = args.skillNames.length > 0 ? new Set(args.skillNames) : null;
   const nextEntries = {};
   const duplicates = new Map();
@@ -217,7 +217,7 @@ async function main() {
 
   for (const repoRoot of repos) {
     const skillsRoot = path.join(repoRoot, args.skillsDir);
-    if (!exists(skillsRoot)) {
+    if (!existsFollow(skillsRoot)) {
       fail(`Repo skills dir not found: ${skillsRoot}`);
     }
 
@@ -262,13 +262,20 @@ async function main() {
     fail(`Duplicate skill names detected (must be globally unique):\n${lines.join('\n')}`);
   }
 
+  if (args.cleanBroken) {
+    const removed = cleanBrokenSymlinks(targetDir, args.dryRun);
+    if (removed.length > 0) {
+      console.log(`→ Removed broken symlinks: ${removed.length}`);
+    }
+  }
+
   // Link/update
   const linkedNames = Object.keys(nextEntries).sort();
   for (const name of linkedNames) {
     const sourceDir = nextEntries[name].dir;
     const linkPath = path.join(targetDir, name);
 
-    if (exists(linkPath)) {
+    if (entryExists(linkPath)) {
       if (!isSymlink(linkPath)) {
         fail(`Path exists and is not a symlink: ${linkPath}`);
       }
@@ -279,54 +286,27 @@ async function main() {
         : null;
       const resolvedDesired = path.resolve(sourceDir);
 
-      const currentReal = resolvedCurrent ? resolveReal(resolvedCurrent) : null;
-      const desiredReal = resolveReal(resolvedDesired) || resolvedDesired;
+      if (resolvedCurrent && !existsFollow(resolvedCurrent)) {
+        // Broken link: safe to replace without requiring --force.
+        removePath(linkPath, args.dryRun);
+      } else {
+        const currentReal = resolvedCurrent ? resolveReal(resolvedCurrent) : null;
+        const desiredReal = resolveReal(resolvedDesired) || resolvedDesired;
 
-      if (currentReal && desiredReal && currentReal === desiredReal) {
-        continue;
+        if (currentReal && desiredReal && currentReal === desiredReal) {
+          continue;
+        }
+
+        if (!args.force) {
+          fail(`Skill link conflict: ${linkPath} points elsewhere. Use --force to replace.`);
+        }
+
+        removePath(linkPath, args.dryRun);
       }
-
-      if (!args.force) {
-        fail(`Skill link conflict: ${linkPath} points elsewhere. Use --force to replace.`);
-      }
-
-      removePath(linkPath, args.dryRun);
     }
 
     createSymlink(sourceDir, linkPath, args.dryRun);
   }
-
-  // Prune only managed entries in previous state that are no longer present.
-  if (args.prune) {
-    const prev = loadState(statePath);
-    if (prev && prev.entries) {
-      for (const oldName of Object.keys(prev.entries)) {
-        if (nextEntries[oldName]) continue;
-        if (selectedNames && !selectedNames.has(oldName)) continue;
-        const oldLink = path.join(targetDir, oldName);
-        if (exists(oldLink) && isSymlink(oldLink)) {
-          removePath(oldLink, args.dryRun);
-        }
-      }
-    }
-  }
-
-  const prev = loadState(statePath);
-  const mergedEntries = prev && prev.entries && typeof prev.entries === 'object'
-    ? { ...prev.entries }
-    : {};
-  for (const [name, info] of Object.entries(nextEntries)) {
-    mergedEntries[name] = { repoRoot: info.repoRoot, dir: info.dir };
-  }
-
-  const state = {
-    schema: 1,
-    agent: args.agent,
-    targetDir,
-    generatedAt: new Date().toISOString(),
-    entries: mergedEntries
-  };
-  writeState(statePath, state, args.dryRun);
 
   console.log(`✓ Union links updated for ${args.agent}`);
   console.log(`→ Target: ${targetDir}`);

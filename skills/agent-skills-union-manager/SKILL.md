@@ -1,6 +1,6 @@
 ---
 name: agent-skills-union-manager
-description: Manage a global union pool of agent skills by creating per-skill symlinks from multiple repos’ `.agent/skills` into agent global skills directories (e.g. `~/.codex/skills`, `~/.claude/skills`, `~/.gemini/skills`), enforcing globally-unique skill names, detecting conflicts, and optionally pruning managed links.
+description: Manage a global union pool of agent skills by creating per-skill symlinks from multiple repos’ `.agent/skills` into agent global skills directories (e.g. `~/.codex/skills`, `~/.claude/skills`, `~/.gemini/skills`), enforcing globally-unique skill names, and detecting conflicts.
 ---
 
 # Agent Skills Union Manager
@@ -60,6 +60,31 @@ node scripts/union-link.cjs \
 3) Repeat per tool
 - Run again for `--agent=claude` (and its `--target`), etc.
 
+### Install THIS skill into Codex / Gemini
+
+This repo stores skills under `skills/` (not `.agent/skills`), so override with `--skills-dir=skills`.
+To link only this skill (and clean broken symlinks in the target dir):
+
+```bash
+# Codex
+node scripts/union-link.cjs \
+  --agent=codex \
+  --target=~/.codex/skills \
+  --repo=/Users/hidetoshidekisugi/Documents/suneo-toolkit \
+  --skills-dir=skills \
+  --skill=agent-skills-union-manager \
+  --clean-broken
+
+# Gemini
+node scripts/union-link.cjs \
+  --agent=gemini \
+  --target=~/.gemini/skills \
+  --repo=/Users/hidetoshidekisugi/Documents/suneo-toolkit \
+  --skills-dir=skills \
+  --skill=agent-skills-union-manager \
+  --clean-broken
+```
+
 ### Common targets
 
 - Codex CLI: `--target=~/.codex/skills`
@@ -79,10 +104,13 @@ node scripts/union-link.cjs --agent=codex --target=~/.codex/skills --repo=/path/
 - Limit to one/few skills with:
   - `--skill=<name>` (repeatable), or
   - `--skills=<a,b,c>`
+- `--clean-broken`: remove broken symlinks in `--target` (safe; does not touch real dirs/files).
 - If a skill link already exists and points elsewhere:
   - default: error (safe)
   - with `--force`: replace the link
-- `--prune`: remove only links tracked in the state file that are no longer present in the current union set.
+
+Note:
+- This script does NOT write any state file into the target dir, and does not support `--prune`.
 
 ## Notes for agents that don’t have project-local skill roots
 
