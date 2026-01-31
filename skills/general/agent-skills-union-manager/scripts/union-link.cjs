@@ -25,6 +25,7 @@ function parseArgs(argv) {
     target: null,
     repos: [],
     skillsDir: '.agent/skills',
+    skillNames: [],
     prune: false,
     force: false,
     dryRun: false
@@ -38,9 +39,15 @@ function parseArgs(argv) {
     else if (raw.startsWith('--target=')) args.target = raw.slice('--target='.length);
     else if (raw.startsWith('--repo=')) args.repos.push(raw.slice('--repo='.length));
     else if (raw.startsWith('--skills-dir=')) args.skillsDir = raw.slice('--skills-dir='.length);
+    else if (raw.startsWith('--skill=')) args.skillNames.push(raw.slice('--skill='.length));
+    else if (raw.startsWith('--skills=')) args.skillNames.push(...raw.slice('--skills='.length).split(','));
     else if (raw === 'help' || raw === '--help') args.help = true;
     else fail(`Unknown arg: ${raw}`);
   }
+
+  args.skillNames = args.skillNames
+    .map(name => String(name || '').trim())
+    .filter(Boolean);
 
   return args;
 }
@@ -61,6 +68,8 @@ Required:
 
 Options:
   --skills-dir=<path>     Skills root relative to repo (default: .agent/skills)
+  --skill=<name>          Only link one skill by name (repeatable)
+  --skills=<a,b,c>        Only link specific skill names (comma-separated)
   --prune                 Remove managed links that are no longer present
   --force                 Replace existing links pointing elsewhere
   --dry-run               Print planned actions without changing filesystem
@@ -201,8 +210,10 @@ async function main() {
   ensureDir(targetDir);
 
   const statePath = path.join(targetDir, '.agent-skills-union-state.json');
+  const selectedNames = args.skillNames.length > 0 ? new Set(args.skillNames) : null;
   const nextEntries = {};
   const duplicates = new Map();
+  const foundSelected = new Set();
 
   for (const repoRoot of repos) {
     const skillsRoot = path.join(repoRoot, args.skillsDir);
@@ -210,7 +221,13 @@ async function main() {
       fail(`Repo skills dir not found: ${skillsRoot}`);
     }
 
-    const skillItems = scanAllSkills(skillsRoot);
+    let skillItems = scanAllSkills(skillsRoot);
+    if (selectedNames) {
+      skillItems = skillItems.filter(item => selectedNames.has(item.name));
+      for (const item of skillItems) {
+        foundSelected.add(item.name);
+      }
+    }
 
     for (const item of skillItems) {
       const existing = nextEntries[item.name];
@@ -224,6 +241,13 @@ async function main() {
         repoRoot,
         dir: item.dir
       };
+    }
+  }
+
+  if (selectedNames) {
+    const missing = [...selectedNames].filter(name => !foundSelected.has(name));
+    if (missing.length > 0) {
+      fail(`Selected skill(s) not found in any repo: ${missing.join(', ')}`);
     }
   }
 
@@ -278,6 +302,7 @@ async function main() {
     if (prev && prev.entries) {
       for (const oldName of Object.keys(prev.entries)) {
         if (nextEntries[oldName]) continue;
+        if (selectedNames && !selectedNames.has(oldName)) continue;
         const oldLink = path.join(targetDir, oldName);
         if (exists(oldLink) && isSymlink(oldLink)) {
           removePath(oldLink, args.dryRun);
@@ -286,17 +311,20 @@ async function main() {
     }
   }
 
+  const prev = loadState(statePath);
+  const mergedEntries = prev && prev.entries && typeof prev.entries === 'object'
+    ? { ...prev.entries }
+    : {};
+  for (const [name, info] of Object.entries(nextEntries)) {
+    mergedEntries[name] = { repoRoot: info.repoRoot, dir: info.dir };
+  }
+
   const state = {
     schema: 1,
     agent: args.agent,
     targetDir,
     generatedAt: new Date().toISOString(),
-    entries: Object.fromEntries(
-      Object.entries(nextEntries).map(([name, info]) => [
-        name,
-        { repoRoot: info.repoRoot, dir: info.dir }
-      ])
-    )
+    entries: mergedEntries
   };
   writeState(statePath, state, args.dryRun);
 

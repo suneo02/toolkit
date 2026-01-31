@@ -76,6 +76,9 @@ node scripts/union-link.cjs --agent=codex --target=~/.codex/skills --repo=/path/
 ## Operations and safety
 
 - The script scans all skills under `<repo>/.agent/skills` (or `--skills-dir`).
+- Limit to one/few skills with:
+  - `--skill=<name>` (repeatable), or
+  - `--skills=<a,b,c>`
 - If a skill link already exists and points elsewhere:
   - default: error (safe)
   - with `--force`: replace the link
