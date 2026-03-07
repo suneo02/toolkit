@@ -14,9 +14,11 @@ CN summary:
 
 Use this skill when you need one of these:
 
-- Install the same skills source to your default 5 agents (`codex`, `claude-code`, `gemini-cli`, `cursor`, `antigravity`).
+- Install the same skills source ONLY to your default 5 agents: `codex`, `claude-code`, `gemini-cli`, `cursor`, `antigravity`.
 - Keep agent-installed skills aligned via `skills check` / `skills update`.
 - Standardize shared skills management on top of the official Vercel skills CLI.
+
+> **CRITICAL**: Always specify the 5 agents explicitly: `--agent codex claude-code gemini-cli cursor antigravity`. Avoid using `--agent '*'` as it may attempt to install to unsupported or unintended directories.
 
 ## Working model (primary)
 
