@@ -18,7 +18,7 @@ Use this skill when you need one of these:
 - Keep agent-installed skills aligned via `skills check` / `skills update`.
 - Standardize shared skills management on top of the official Vercel skills CLI.
 
-> **CRITICAL**: Always specify the 5 agents explicitly: `--agent codex claude-code gemini-cli cursor antigravity`. Avoid using `--agent '*'` as it may attempt to install to unsupported or unintended directories.
+> **CRITICAL**: Always specify the 5 agents explicitly: `--agent codex claude-code gemini-cli cursor antigravity` and use the `--global` (or `-g`) flag to ensure installation to user-level directories rather than project-local ones. Avoid using `--agent '*'` as it may attempt to install to unsupported or unintended directories.
 
 ## Working model (primary)
 
@@ -41,12 +41,13 @@ npx skills <add|check|update> [options]
 
 ### 1) Sync source to multiple agents
 
-Install all skills to your default 5 agents:
+Install all skills to your default 5 agents globally:
 
 ```bash
 npx skills add /path/to/skills-source \
   --skill '*' \
   --agent codex claude-code gemini-cli cursor antigravity \
+  --global \
   --yes
 ```
 
@@ -56,6 +57,7 @@ For selective publish:
 npx skills add /path/to/skills-source \
   --agent codex claude-code gemini-cli cursor antigravity \
   --skill shared-skills-manager \
+  --global \
   --yes
 ```
 
@@ -66,24 +68,25 @@ npx skills add /path/to/skills-source \
   --skill '*' \
   --agent codex claude-code gemini-cli cursor antigravity \
   --copy \
+  --global \
   --yes
 ```
 
 ### 2) Check updates (for installed official sources)
 
 ```bash
-npx skills check
+npx skills check --global
 ```
 
 ### 3) Apply updates
 
 ```bash
-npx skills update
+npx skills update --global
 ```
 
 ### 4) Local source edits
 
-If your source folder changed (for example you edited `SKILL.md`), rerun `add` to reinstall.
+If your source folder changed (for example you edited `SKILL.md`), rerun `add` with `--global` to reinstall.
 
 ## Install THIS skill from this repo
 
@@ -93,6 +96,7 @@ This repo stores skills under `skills/`, so source is the repo `skills/` directo
 npx skills add /Users/hidetoshidekisugi/Documents/suneo-toolkit/skills \
   --agent codex claude-code gemini-cli cursor antigravity \
   --skill shared-skills-manager \
+  --global \
   --yes
 ```
 
