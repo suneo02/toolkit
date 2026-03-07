@@ -6,13 +6,15 @@ description: Manage one shared skills source across multiple agents by delegatin
 # Shared Skills Manager
 
 CN summary:
+
 - 目标是让多个 agent 共用同一份 skills，并把主要安装/更新逻辑交给 `vercel-labs/skills`。
 - 真源建议放在项目目录（如 `skills/` 或 `docs/skills`）；agent 侧通过官方 canonical + links 消费。
 
 ## When to use
 
 Use this skill when you need one of these:
-- Install the same skills source to multiple agents (`codex`, `claude-code`, `gemini-cli`, `cursor`).
+
+- Install the same skills source to your default 5 agents (`codex`, `claude-code`, `gemini-cli`, `cursor`, `antigravity`).
 - Keep agent-installed skills aligned via `skills check` / `skills update`.
 - Standardize shared skills management on top of the official Vercel skills CLI.
 
@@ -23,6 +25,7 @@ Use this skill when you need one of these:
 - **Agent path**: per-agent directory (for example `~/.codex/skills`) linked from canonical by official tooling.
 
 Note:
+
 - Editing canonical does not automatically sync back to your source folder.
 - If you need canonical -> source back-sync, keep it as your own separate script/process.
 
@@ -36,28 +39,32 @@ npx skills <add|check|update> [options]
 
 ### 1) Sync source to multiple agents
 
-Install all skills to all agents:
+Install all skills to your default 5 agents:
 
 ```bash
-npx skills add /path/to/skills-source --all
-```
-
-Install all skills to selected agents:
-
-```bash
-npx skills add /path/to/skills-source --skill '*' --agent codex claude-code gemini-cli --yes
+npx skills add /path/to/skills-source \
+  --skill '*' \
+  --agent codex claude-code gemini-cli cursor antigravity \
+  --yes
 ```
 
 For selective publish:
 
 ```bash
-npx skills add /path/to/skills-source --agent codex --skill shared-skills-manager --yes
+npx skills add /path/to/skills-source \
+  --agent codex claude-code gemini-cli cursor antigravity \
+  --skill shared-skills-manager \
+  --yes
 ```
 
 For copy mode:
 
 ```bash
-npx skills add /path/to/skills-source --skill '*' --agent codex --copy --yes
+npx skills add /path/to/skills-source \
+  --skill '*' \
+  --agent codex claude-code gemini-cli cursor antigravity \
+  --copy \
+  --yes
 ```
 
 ### 2) Check updates (for installed official sources)
@@ -82,7 +89,7 @@ This repo stores skills under `skills/`, so source is the repo `skills/` directo
 
 ```bash
 npx skills add /Users/hidetoshidekisugi/Documents/suneo-toolkit/skills \
-  --agent codex gemini-cli \
+  --agent codex claude-code gemini-cli cursor antigravity \
   --skill shared-skills-manager \
   --yes
 ```
@@ -90,5 +97,6 @@ npx skills add /Users/hidetoshidekisugi/Documents/suneo-toolkit/skills \
 ## Safety notes
 
 - Prefer explicit `--skill` publish lists for high-safety repos.
+- Avoid `--all` unless you intentionally want every supported agent.
 - Official CLI may overwrite same-name skills; namespace names to avoid accidental replacement.
 - Keep skill folder names in kebab-case.
