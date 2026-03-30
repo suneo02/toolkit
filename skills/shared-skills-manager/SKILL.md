@@ -12,6 +12,8 @@ description: Manage one shared skills source across multiple agents by delegatin
 - Install / remove / update skills across multiple agents.
 - Keep agent-installed skills aligned via `skills check` / `skills update`.
 
+> **CRITICAL**: Always specify the 5 agents explicitly: `-a codex -a claude-code -a gemini-cli -a cursor -a antigravity` and use `-g` to ensure installation to user-level directories. Avoid `--agent '*'` or `--all` as it may install to unsupported or unintended directories.
+
 ## Supported source types
 
 The CLI accepts these source formats directly — **no manual `git clone` needed**:
@@ -82,11 +84,13 @@ npx skills <command> [options]
 # Interactive — prompts for skill and agent selection
 npx skills add owner/repo -g
 
-# Install all skills to all detected agents, non-interactive
-npx skills add owner/repo --all -g
+# Install all skills to the 5 default agents, non-interactive
+npx skills add owner/repo \
+  -s '*' -a codex -a claude-code -a gemini-cli -a cursor -a antigravity -g -y
 
 # Install specific skill(s) to specific agent(s)
-npx skills add owner/repo -s skill-name -a claude-code -a cursor -g -y
+npx skills add owner/repo \
+  -s skill-name -a claude-code -a cursor -g -y
 
 # Install from a specific branch
 npx skills add owner/repo@develop -g -y
@@ -98,8 +102,15 @@ npx skills add owner/repo --list
 ### Install from local path
 
 ```bash
-npx skills add /path/to/skills-source --all -g
+npx skills add /path/to/skills-source \
+  -s '*' -a codex -a claude-code -a gemini-cli -a cursor -a antigravity -g -y
+
+# Copy mode — independent copies per agent, no symlinks
+npx skills add /path/to/skills-source \
+  -s '*' -a codex -a claude-code -a gemini-cli -a cursor -a antigravity -g -y --copy
 ```
+
+> If your local source changed (e.g. edited `SKILL.md`), rerun `npx skills add` to reinstall.
 
 ### Check & update
 
@@ -132,7 +143,7 @@ npx skills list -g
 
 ```bash
 npx skills add /Users/hidetoshidekisugi/Documents/suneo-toolkit/skills \
-  -s shared-skills-manager --all -g
+  -s shared-skills-manager -a codex -a claude-code -a gemini-cli -a cursor -a antigravity -g -y
 ```
 
 ## Safety notes
