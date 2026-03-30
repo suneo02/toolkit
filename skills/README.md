@@ -1,4 +1,3 @@
-https://github.com/obra/superpowers/tree/main/skills/brainstorming
-https://github.com/obra/superpowers/blob/main/skills/receiving-code-review
-https://github.com/obra/superpowers/tree/main/skills/requesting-code-review
-https://github.com/obra/superpowers/tree/main/skills/test-driven-development
+obra/superpowers
+https://github.com/anthropics/skills/tree/main/skills/skill-creator
+https://github.com/OthmanAdi/planning-with-files/tree/master/skills/planning-with-files
