@@ -5,100 +5,139 @@ description: Manage one shared skills source across multiple agents by delegatin
 
 # Shared Skills Manager
 
-CN summary:
-
-- 目标是让多个 agent 共用同一份 skills，并把主要安装/更新逻辑交给 `vercel-labs/skills`。
-- 真源建议放在项目目录（如 `skills/` 或 `docs/skills`）；agent 侧通过官方 canonical + links 消费。
+管理跨 agent 共享的 skills，基于 `vercel-labs/skills` 官方 CLI。
 
 ## When to use
 
-Use this skill when you need one of these:
-
-- Install the same skills source ONLY to your default 5 agents: `codex`, `claude-code`, `gemini-cli`, `cursor`, `antigravity`.
+- Install / remove / update skills across multiple agents.
 - Keep agent-installed skills aligned via `skills check` / `skills update`.
-- Standardize shared skills management on top of the official Vercel skills CLI.
 
-> **CRITICAL**: Always specify the 5 agents explicitly: `--agent codex claude-code gemini-cli cursor antigravity`. Avoid using `--agent '*'` as it may attempt to install to unsupported or unintended directories.
+## Supported source types
 
-## Working model (primary)
+The CLI accepts these source formats directly — **no manual `git clone` needed**:
 
-- **Source of truth (recommended)**: a project-local folder (for example `skills/` or `docs/skills`).
-- **Canonical pool**: managed by `vercel-labs/skills` under `~/.agents/skills`.
-- **Agent path**: per-agent directory (for example `~/.codex/skills`) linked from canonical by official tooling.
+| Format | Example |
+|---|---|
+| GitHub shorthand | `owner/repo` |
+| GitHub URL | `https://github.com/owner/repo` |
+| With branch/tag | `owner/repo@branch` |
+| With subpath | `owner/repo/path/to/skills` |
+| GitLab | `https://gitlab.com/owner/repo` |
+| SSH | `git@github.com:owner/repo.git` |
+| Local path | `/path/to/skills` or `./skills` |
 
-Note:
+## CLI reference
 
-- Editing canonical does not automatically sync back to your source folder.
-- If you need canonical -> source back-sync, keep it as your own separate script/process.
-
-## Primary workflow (Vercel-first)
-
-Use the official CLI directly:
-
-```bash
-npx skills <add|check|update> [options]
+```
+npx skills <command> [options]
 ```
 
-### 1) Sync source to multiple agents
+### Commands
 
-Install all skills to your default 5 agents:
+| Command | Aliases | Description |
+|---|---|---|
+| `add [source]` | `a`, `i`, `install` | Install skills from repo, URL, or local path |
+| `remove` | `rm`, `r` | Uninstall skills |
+| `list` | `ls` | Show installed skills |
+| `find [query]` | `f`, `search`, `s` | Search available skills |
+| `check` | | Check for updates |
+| `update` | `upgrade` | Apply updates |
+| `init [name]` | | Create new skill template |
+
+### Key flags for `add`
+
+| Flag | Description |
+|---|---|
+| `-g, --global` | Install to user-level (`~/.agents/skills/`) instead of project |
+| `-a, --agent <agents>` | Target agents (comma-separated, or `*` for all detected) |
+| `-s, --skill <skills>` | Select skills by name (comma-separated, or `*` for all) |
+| `-y, --yes` | Skip prompts (non-interactive) |
+| `--all` | Shorthand for `--skill '*' --agent '*' -y` |
+| `--copy` | Copy files instead of symlink |
+| `-l, --list` | Preview available skills without installing |
+
+### Key flags for `remove`
+
+| Flag | Description |
+|---|---|
+| `-g, --global` | Remove from global scope |
+| `-a, --agent <agents>` | Target agents |
+| `-s, --skill <skills>` | Skills to remove |
+| `-y, --yes` | Skip prompts |
+| `--all` | Remove all skills from all agents |
+
+### Key flags for `list`
+
+| Flag | Description |
+|---|---|
+| `-g, --global` | List global skills |
+| `-a, --agent <agents>` | Filter by agent |
+| `--json` | Machine-readable output |
+
+## Workflows
+
+### Install from GitHub (most common)
 
 ```bash
-npx skills add /path/to/skills-source \
-  --skill '*' \
-  --agent codex claude-code gemini-cli cursor antigravity \
-  --yes
+# Interactive — prompts for skill and agent selection
+npx skills add owner/repo -g
+
+# Install all skills to all detected agents, non-interactive
+npx skills add owner/repo --all -g
+
+# Install specific skill(s) to specific agent(s)
+npx skills add owner/repo -s skill-name -a claude-code -a cursor -g -y
+
+# Install from a specific branch
+npx skills add owner/repo@develop -g -y
+
+# Preview available skills before installing
+npx skills add owner/repo --list
 ```
 
-For selective publish:
+### Install from local path
 
 ```bash
-npx skills add /path/to/skills-source \
-  --agent codex claude-code gemini-cli cursor antigravity \
-  --skill shared-skills-manager \
-  --yes
+npx skills add /path/to/skills-source --all -g
 ```
 
-For copy mode:
+### Check & update
 
 ```bash
-npx skills add /path/to/skills-source \
-  --skill '*' \
-  --agent codex claude-code gemini-cli cursor antigravity \
-  --copy \
-  --yes
+npx skills check -g
+npx skills update -g
 ```
 
-### 2) Check updates (for installed official sources)
+### Remove skills
 
 ```bash
-npx skills check
+npx skills remove -s skill-name -g -y
+npx skills remove --all -g
 ```
 
-### 3) Apply updates
+### List installed
 
 ```bash
-npx skills update
+npx skills list -g
 ```
 
-### 4) Local source edits
+## How it works
 
-If your source folder changed (for example you edited `SKILL.md`), rerun `add` to reinstall.
+- **Canonical storage**: `~/.agents/skills/` (global) or `./<agent>/skills/` (project)
+- **Agent linking**: symlinks from each agent dir (e.g. `~/.claude/skills/skill-name`) to canonical (default). Use `--copy` for independent copies.
+- **Lock file**: `~/.agents/.skill-lock.json` (global) or `./skills-lock.json` (project) — tracks source, version hash, timestamps for update detection.
+- **Scope**: `-g` = global (user-level, cross-project); omit = project-local (committed to git).
 
 ## Install THIS skill from this repo
 
-This repo stores skills under `skills/`, so source is the repo `skills/` directory:
-
 ```bash
 npx skills add /Users/hidetoshidekisugi/Documents/suneo-toolkit/skills \
-  --agent codex claude-code gemini-cli cursor antigravity \
-  --skill shared-skills-manager \
-  --yes
+  -s shared-skills-manager --all -g
 ```
 
 ## Safety notes
 
-- Prefer explicit `--skill` publish lists for high-safety repos.
-- Avoid `--all` unless you intentionally want every supported agent.
-- Official CLI may overwrite same-name skills; namespace names to avoid accidental replacement.
-- Keep skill folder names in kebab-case.
+- Prefer explicit `-s skill-name` for repos you don't fully trust.
+- CLI rejects path traversal (`..` in subpaths).
+- Private repos require `GITHUB_TOKEN`, `GH_TOKEN`, or `gh auth token`.
+- Same-name skills get overwritten — use namespaced names to avoid collisions.
