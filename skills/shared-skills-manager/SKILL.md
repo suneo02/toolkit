@@ -10,16 +10,15 @@ description: Manage one shared skills source across multiple agents. Use this sk
 | 场景 | 方式 | 特点 |
 |---|---|---|
 | **网上/GitHub skills** | `npx skills add` (vercel-labs/skills CLI) | 下载到 `~/.agents/skills/`，再 symlink 到各 agent |
-| **自写 skills** (本 repo) | `<skill-dir>/scripts/union-link.cjs` | 直接 symlink 到源目录，编辑即生效 |
+| **自写 skills** | `node <skill-base-dir>/scripts/union-link.cjs` | 直接 symlink 到源目录，编辑即生效 |
 
-> **`<skill-dir>`** = 本 SKILL.md 所在目录（安装后为 `~/.claude/skills/shared-skills-manager` 等）。
-> 若不确定路径，先运行 `ls ~/.claude/skills/shared-skills-manager/scripts/` 确认。
+> **`<skill-base-dir>`** = 加载本 skill 时系统提示的 `Base directory`（如 `~/.claude/skills/shared-skills-manager`）。
 
 ---
 
 ## Workflow A: 网上 skills — vercel-labs/skills CLI
 
-### Install from GitHub (most common)
+### 安装（最常用）
 
 ```bash
 # 安装全部 skills，非交互模式
@@ -37,16 +36,16 @@ npx skills add owner/repo@develop -g -y
 npx skills add owner/repo --list
 ```
 
-> **注意**: 始终明确指定 5 个 agent（`-a codex -a claude-code -a gemini-cli -a cursor -a antigravity`）加 `-g`，避免使用 `--agent '*'`。
+> 始终明确列出各 agent（`-a codex -a claude-code -a gemini-cli -a cursor -a antigravity`）加 `-g`，避免使用 `--agent '*'`。
 
-### Check & update
+### 检查与更新
 
 ```bash
 npx skills check -g
 npx skills update -g
 ```
 
-### Remove / list
+### 卸载 / 列出
 
 ```bash
 npx skills remove -s skill-name -g -y
@@ -89,43 +88,39 @@ npx skills list -g
 
 ---
 
-## Workflow B: 自写 skills — union-link.cjs（推荐用于本 repo）
+## Workflow B: 自写 skills — union-link.cjs
 
-自写的 skill 通过 skill 内置的 `scripts/union-link.cjs` 在各 agent 目录创建 symlink，直接指向源目录。**修改源文件后无需重新安装，立即生效。**
+自写的 skill 通过本 skill 内置的 `scripts/union-link.cjs` 在各 agent 目录创建 symlink，**直接指向你的源目录**。修改源文件后无需重新安装，立即生效。
+
+在运行命令前，先从对话上下文确认两个路径：
+- **`<skill-base-dir>`**：本 skill 的安装目录（加载时系统会提示）
+- **`<your-skills-dir>`**：你自己的 skills 源目录（从用户提供的信息或工作目录推断）
 
 ### 使用方法
 
 ```bash
 # 全量 sync 到所有 agents（global）
-node <skill-dir>/scripts/union-link.cjs \
+node <skill-base-dir>/scripts/union-link.cjs \
   --agent=claude-code,codex,gemini-cli,cursor,antigravity \
-  --src=<path-to-your-skills-dir>
+  --src=<your-skills-dir>
 
 # 只 sync 特定 skill
-node <skill-dir>/scripts/union-link.cjs \
+node <skill-base-dir>/scripts/union-link.cjs \
   --agent=claude-code,codex,gemini-cli,cursor,antigravity \
-  --src=<path-to-your-skills-dir> \
+  --src=<your-skills-dir> \
   --skill=my-skill-name
 
-# dry-run 预览
-node <skill-dir>/scripts/union-link.cjs \
+# dry-run 预览（不实际变更）
+node <skill-base-dir>/scripts/union-link.cjs \
   --agent=claude-code \
-  --src=<path-to-your-skills-dir> \
+  --src=<your-skills-dir> \
   --dry-run
 
 # 替换冲突 link
-node <skill-dir>/scripts/union-link.cjs \
+node <skill-base-dir>/scripts/union-link.cjs \
   --agent=all \
-  --src=<path-to-your-skills-dir> \
+  --src=<your-skills-dir> \
   --force
-```
-
-### 安装 / 更新 THIS skill 本身
-
-```bash
-node ~/.claude/skills/shared-skills-manager/scripts/union-link.cjs \
-  --agent=claude-code,codex,gemini-cli,cursor,antigravity \
-  --src=<path-to-your-skills-dir>
 ```
 
 ### 参数说明
@@ -133,7 +128,7 @@ node ~/.claude/skills/shared-skills-manager/scripts/union-link.cjs \
 | 参数 | 说明 |
 |---|---|
 | `--agent=<names\|all>` | 目标 agent，逗号分隔，或 `all`（自动检测已安装） |
-| `--src=<path>` | 源 skills 目录（必须）|
+| `--src=<path>` | 源 skills 目录（必须） |
 | `--local` | link 到 project-local 目录而非 global |
 | `--skill=<name>` | 只 link 指定 skill（可重复） |
 | `--skills=<a,b,c>` | 逗号分隔的 skill 列表 |
@@ -143,22 +138,17 @@ node ~/.claude/skills/shared-skills-manager/scripts/union-link.cjs \
 
 ### 源目录结构要求
 
+每个 skill 子目录必须包含 `SKILL.md` 才会被识别：
+
 ```
 your-skills/
 ├── skill-a/
-│   └── SKILL.md        ← 必须存在
+│   └── SKILL.md
 ├── skill-b/
 │   └── SKILL.md
-└── shared-skills-manager/
+└── skill-c/
     ├── SKILL.md
-    └── scripts/        ← 本 skill 的内置脚本
-        ├── union-link.cjs
-        └── lib/
-            ├── agents.cjs
-            ├── args.cjs
-            ├── fs-utils.cjs
-            ├── scanner.cjs
-            └── sync-engine.cjs
+    └── scripts/    ← 可选的内置脚本
 ```
 
 ### Supported Agents
@@ -188,6 +178,6 @@ your-skills/
 ## 注意事项
 
 - 同名 skill 会被覆盖，使用带命名空间的名称避免冲突。
-- `union-link.cjs` 遇到非 symlink 的同名路径会报错（不会覆盖真实目录）。
-- `--force` 不加时，若 link 指向其他位置会报错。
+- `union-link.cjs` 遇到非 symlink 的同名路径会报错，不会覆盖真实目录。
+- `--force` 不加时，若已有 link 指向其他位置会报错。
 - 私有 GitHub repo 需设置 `GITHUB_TOKEN`、`GH_TOKEN` 或 `gh auth token`。
