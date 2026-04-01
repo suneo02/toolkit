@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-local-sync-all",
+  "prompt": "把我在 suneo-toolkit/skills 里写的所有 skill sync 到所有 agents",
+  "assertions": [
+    {"id": "uses-union-link", "description": "Response uses union-link.cjs (not npx skills add)"},
+    {"id": "has-src-path", "description": "Response includes --src pointing to skills directory"},
+    {"id": "mentions-all-agents", "description": "Response targets multiple/all agents"},
+    {"id": "no-reinstall-needed", "description": "Response explains symlink benefit (no reinstall needed after edits)"}
+  ]
+}

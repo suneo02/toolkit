@@ -1,0 +1,28 @@
+{
+  "eval_id": 1,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-npx-skills-add",
+      "passed": true,
+      "evidence": "Response uses 'npx skills add vercel-labs/ai-coding-skills' as the primary command"
+    },
+    {
+      "text": "specifies-repo",
+      "passed": true,
+      "evidence": "Response includes 'vercel-labs/ai-coding-skills' as the source argument"
+    },
+    {
+      "text": "specifies-agents",
+      "passed": true,
+      "evidence": "Response specifies '-a claude-code -a codex' in the command"
+    },
+    {
+      "text": "specifies-global",
+      "passed": true,
+      "evidence": "Response includes '-g' flag with explanation that it writes to ~/.agents/skills/"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Perfect response. Correctly identifies Workflow A for GitHub skills, provides exact command with all required flags."
+}

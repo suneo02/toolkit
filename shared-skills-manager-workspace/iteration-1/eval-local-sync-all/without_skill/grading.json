@@ -1,0 +1,28 @@
+{
+  "eval_id": 2,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-union-link",
+      "passed": true,
+      "evidence": "Baseline agent explored the filesystem and found union-link.cjs at the skill path, used it correctly. Note: this is filesystem-aware general agent, not pure zero-knowledge baseline."
+    },
+    {
+      "text": "has-src-path",
+      "passed": true,
+      "evidence": "Response includes '--src=/Users/hidetoshidekisugi/Documents/suneo-toolkit/skills'"
+    },
+    {
+      "text": "mentions-all-agents",
+      "passed": true,
+      "evidence": "Response targets all 5 agents"
+    },
+    {
+      "text": "no-reinstall-needed",
+      "passed": true,
+      "evidence": "States '编辑 skills/ 下的文件会立即对所有 agent 生效，无需重新 sync'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Baseline scored 4/4 because the agent has filesystem access and found the script by exploring the repo. This eval has low discriminating power — both pass. A true zero-knowledge baseline (no file access) would likely fail 'uses-union-link'."
+}

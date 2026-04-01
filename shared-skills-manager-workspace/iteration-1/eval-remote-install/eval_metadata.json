@@ -1,0 +1,11 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-remote-install",
+  "prompt": "我想把 vercel-labs/ai-coding-skills 全局安装到 claude-code 和 codex",
+  "assertions": [
+    {"id": "uses-npx-skills-add", "description": "Response uses npx skills add command"},
+    {"id": "specifies-repo", "description": "Response includes vercel-labs/ai-coding-skills as the source"},
+    {"id": "specifies-agents", "description": "Response specifies -a claude-code and -a codex"},
+    {"id": "specifies-global", "description": "Response includes -g or --global flag"}
+  ]
+}

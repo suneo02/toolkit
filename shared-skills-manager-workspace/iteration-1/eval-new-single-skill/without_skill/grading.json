@@ -1,0 +1,28 @@
+{
+  "eval_id": 3,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-union-link",
+      "passed": false,
+      "evidence": "Response uses manual copy/paste approach: 'cat git-workflow/SKILL.md >> CLAUDE.md', cp to .cursor/rules/, etc. No mention of union-link.cjs."
+    },
+    {
+      "text": "targets-correct-agents",
+      "passed": true,
+      "evidence": "Response correctly addresses Claude Code and Cursor with separate sections"
+    },
+    {
+      "text": "filters-single-skill",
+      "passed": false,
+      "evidence": "No --skill filter concept exists in the manual approach. User would need to manually copy to each location."
+    },
+    {
+      "text": "explains-skill-dir-structure",
+      "passed": true,
+      "evidence": "Mentions SKILL.md and skill directory structure in the context of the copy-based approach"
+    }
+  ],
+  "pass_rate": 0.5,
+  "notes": "Baseline falls back to manual copy/paste to CLAUDE.md and .cursor/rules/. No awareness of centralized skill management or union-link. This is the most discriminating eval."
+}

@@ -1,0 +1,28 @@
+{
+  "eval_id": 1,
+  "run": "without_skill",
+  "expectations": [
+    {
+      "text": "uses-npx-skills-add",
+      "passed": false,
+      "evidence": "Response uses completely fabricated 'claude skill install' and 'codex skill install' commands that don't exist"
+    },
+    {
+      "text": "specifies-repo",
+      "passed": true,
+      "evidence": "Response correctly includes 'vercel-labs/ai-coding-skills' as the repo"
+    },
+    {
+      "text": "specifies-agents",
+      "passed": false,
+      "evidence": "Response uses separate per-agent commands rather than a single unified command with -a flags"
+    },
+    {
+      "text": "specifies-global",
+      "passed": true,
+      "evidence": "Response includes --global flag in fabricated commands"
+    }
+  ],
+  "pass_rate": 0.5,
+  "notes": "Baseline invents non-existent 'claude skill install' / 'codex skill install' commands. Knows the repo name and --global concept but completely wrong CLI syntax."
+}

@@ -1,0 +1,28 @@
+{
+  "eval_id": 2,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-union-link",
+      "passed": true,
+      "evidence": "Response uses 'node ~/.claude/skills/shared-skills-manager/scripts/union-link.cjs', correctly choosing Workflow B over npx skills add"
+    },
+    {
+      "text": "has-src-path",
+      "passed": true,
+      "evidence": "Response includes '--src=/Users/hidetoshidekisugi/Documents/suneo-toolkit/skills'"
+    },
+    {
+      "text": "mentions-all-agents",
+      "passed": true,
+      "evidence": "Response targets '--agent=claude-code,codex,gemini-cli,cursor,antigravity' — all 5 agents"
+    },
+    {
+      "text": "no-reinstall-needed",
+      "passed": true,
+      "evidence": "Explicitly states '修改后立即生效，无需重新安装' and explains symlink mechanism"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Perfect response. Correctly distinguishes local skills from GitHub skills, uses union-link with correct path via installed skill location."
+}

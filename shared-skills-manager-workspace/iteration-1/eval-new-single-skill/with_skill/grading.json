@@ -1,0 +1,28 @@
+{
+  "eval_id": 3,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "uses-union-link",
+      "passed": true,
+      "evidence": "Response uses 'node .../union-link.cjs' — correctly identifies Workflow B for a locally-authored skill"
+    },
+    {
+      "text": "targets-correct-agents",
+      "passed": true,
+      "evidence": "Response uses '--agent=claude-code,cursor' matching exactly what the user asked"
+    },
+    {
+      "text": "filters-single-skill",
+      "passed": true,
+      "evidence": "Response uses '--skill=git-workflow' to link only the new skill, not the entire skills directory"
+    },
+    {
+      "text": "explains-skill-dir-structure",
+      "passed": true,
+      "evidence": "Response mentions 'git-workflow/SKILL.md' and notes that edits to SKILL.md take effect immediately"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Perfect. Uses --skill=git-workflow for precise single-skill linking, correct agents, explains symlink benefit."
+}

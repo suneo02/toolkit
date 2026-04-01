@@ -1,0 +1,44 @@
+{
+  "skill_name": "shared-skills-manager",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "eval-remote-install",
+      "prompt": "我想把 vercel-labs/ai-coding-skills 全局安装到 claude-code 和 codex",
+      "expected_output": "提供使用 npx skills add 命令安装，指定 -a claude-code -a codex 和 -g 参数",
+      "assertions": [
+        {"id": "uses-npx-skills-add", "description": "Response uses npx skills add command"},
+        {"id": "specifies-repo", "description": "Response includes vercel-labs/ai-coding-skills as the source"},
+        {"id": "specifies-agents", "description": "Response specifies -a claude-code and -a codex"},
+        {"id": "specifies-global", "description": "Response includes -g or --global flag"}
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "eval-local-sync-all",
+      "prompt": "把我在 suneo-toolkit/skills 里写的所有 skill sync 到所有 agents",
+      "expected_output": "提供使用 union-link.cjs 的命令，包含 --agent 所有 agents 和 --src 指向 skills 目录",
+      "assertions": [
+        {"id": "uses-union-link", "description": "Response uses union-link.cjs (not npx skills add)"},
+        {"id": "has-src-path", "description": "Response includes --src pointing to skills directory"},
+        {"id": "mentions-all-agents", "description": "Response targets multiple/all agents"},
+        {"id": "no-reinstall-needed", "description": "Response explains symlink benefit (no reinstall needed after edits)"}
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "eval_name": "eval-new-single-skill",
+      "prompt": "新写了一个叫 git-workflow 的 skill，怎么让 claude-code 和 cursor 能用到？",
+      "expected_output": "提供使用 union-link.cjs 的命令，使用 --skill=git-workflow 只 link 这个 skill，指定 --agent=claude-code,cursor",
+      "assertions": [
+        {"id": "uses-union-link", "description": "Response uses union-link.cjs"},
+        {"id": "targets-correct-agents", "description": "Response targets claude-code and cursor"},
+        {"id": "filters-single-skill", "description": "Response uses --skill=git-workflow or --skills=git-workflow to filter"},
+        {"id": "explains-skill-dir-structure", "description": "Response mentions the skill needs a SKILL.md inside its directory"}
+      ],
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-new-single-skill",
+  "prompt": "新写了一个叫 git-workflow 的 skill，怎么让 claude-code 和 cursor 能用到？",
+  "assertions": [
+    {"id": "uses-union-link", "description": "Response uses union-link.cjs"},
+    {"id": "targets-correct-agents", "description": "Response targets claude-code and cursor"},
+    {"id": "filters-single-skill", "description": "Response uses --skill=git-workflow or --skills=git-workflow to filter"},
+    {"id": "explains-skill-dir-structure", "description": "Response mentions the skill needs a SKILL.md inside its directory"}
+  ]
+}

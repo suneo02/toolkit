@@ -1,0 +1,172 @@
+{
+  "metadata": {
+    "skill_name": "shared-skills-manager",
+    "skill_path": "/Users/hidetoshidekisugi/Documents/suneo-toolkit/skills/shared-skills-manager",
+    "timestamp": "2026-04-01T07:09:33Z",
+    "evals_run": ["eval-remote-install", "eval-local-sync-all", "eval-new-single-skill"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "eval-remote-install",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 26.3,
+        "tokens": 7612,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-npx-skills-add", "passed": true, "evidence": "Response uses 'npx skills add vercel-labs/ai-coding-skills'"},
+        {"text": "specifies-repo", "passed": true, "evidence": "Includes 'vercel-labs/ai-coding-skills' as source arg"},
+        {"text": "specifies-agents", "passed": true, "evidence": "Specifies '-a claude-code -a codex'"},
+        {"text": "specifies-global", "passed": true, "evidence": "Includes '-g' with explanation"}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "eval-remote-install",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "time_seconds": 20.5,
+        "tokens": 3625,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-npx-skills-add", "passed": false, "evidence": "Uses fabricated 'claude skill install' / 'codex skill install' commands"},
+        {"text": "specifies-repo", "passed": true, "evidence": "Correctly includes 'vercel-labs/ai-coding-skills'"},
+        {"text": "specifies-agents", "passed": false, "evidence": "Uses separate per-agent commands, no -a flags"},
+        {"text": "specifies-global", "passed": true, "evidence": "Includes --global flag"}
+      ],
+      "notes": ["Baseline invents non-existent CLI commands for each agent separately"]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "eval-local-sync-all",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 39.5,
+        "tokens": 11344,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-union-link", "passed": true, "evidence": "Uses union-link.cjs, correctly distinguishes from npx skills add"},
+        {"text": "has-src-path", "passed": true, "evidence": "Includes --src pointing to suneo-toolkit/skills"},
+        {"text": "mentions-all-agents", "passed": true, "evidence": "Targets all 5 agents"},
+        {"text": "no-reinstall-needed", "passed": true, "evidence": "Explicitly explains symlink benefit: 修改后立即生效，无需重新安装"}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "eval-local-sync-all",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 42.8,
+        "tokens": 13126,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-union-link", "passed": true, "evidence": "Baseline explored the filesystem and found union-link.cjs — low discriminating power for this eval"},
+        {"text": "has-src-path", "passed": true, "evidence": "Includes --src correctly"},
+        {"text": "mentions-all-agents", "passed": true, "evidence": "Lists all 5 agents"},
+        {"text": "no-reinstall-needed", "passed": true, "evidence": "Explains symlink benefit"}
+      ],
+      "notes": ["Baseline passed because it has filesystem access and found the script by exploring the repo. This eval doesn't discriminate well."]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "eval-new-single-skill",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 33.1,
+        "tokens": 8450,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-union-link", "passed": true, "evidence": "Uses union-link.cjs for locally-authored skill"},
+        {"text": "targets-correct-agents", "passed": true, "evidence": "--agent=claude-code,cursor"},
+        {"text": "filters-single-skill", "passed": true, "evidence": "--skill=git-workflow for targeted install"},
+        {"text": "explains-skill-dir-structure", "passed": true, "evidence": "Mentions git-workflow/SKILL.md and immediate symlink effect"}
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "eval-new-single-skill",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 2,
+        "failed": 2,
+        "total": 4,
+        "time_seconds": 31.2,
+        "tokens": 4216,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "uses-union-link", "passed": false, "evidence": "Falls back to manual copy: cat SKILL.md >> CLAUDE.md, cp to .cursor/rules/"},
+        {"text": "targets-correct-agents", "passed": true, "evidence": "Addresses Claude Code and Cursor with separate sections"},
+        {"text": "filters-single-skill", "passed": false, "evidence": "No --skill filter; manual copy approach has no equivalent"},
+        {"text": "explains-skill-dir-structure", "passed": true, "evidence": "Mentions SKILL.md in context of copy-based approach"}
+      ],
+      "notes": ["Most discriminating eval: baseline uses manual copy/paste, skill uses union-link with --skill filter"]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 33.0, "stddev": 6.6, "min": 26.3, "max": 39.5},
+      "tokens": {"mean": 9135, "stddev": 1898, "min": 7612, "max": 11344}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.67, "stddev": 0.29, "min": 0.5, "max": 1.0},
+      "time_seconds": {"mean": 31.5, "stddev": 11.2, "min": 20.5, "max": 42.8},
+      "tokens": {"mean": 6989, "stddev": 5048, "min": 3625, "max": 13126}
+    },
+    "delta": {
+      "pass_rate": "+0.33",
+      "time_seconds": "+1.5",
+      "tokens": "+2146"
+    }
+  },
+  "notes": [
+    "eval-local-sync-all has low discriminating power: baseline agent explored the filesystem and found union-link.cjs — a true zero-knowledge baseline would likely score 0.5 here too",
+    "eval-remote-install and eval-new-single-skill clearly show skill value: baseline invents wrong commands or falls back to manual copy/paste",
+    "with_skill is perfectly consistent (1.0 ± 0.0) across all 3 evals",
+    "Most impactful differentiator: 'uses-union-link' for local workflows — baseline doesn't know about centralized skill management without the skill loaded"
+  ]
+}
