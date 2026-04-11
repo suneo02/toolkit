@@ -1,6 +1,12 @@
 ---
 name: shared-skills-manager
-description: Manage one shared skills source across multiple agents. Use this skill when the user wants to install, update, remove, check, or sync skills across agents (Claude Code, Codex, Gemini CLI, Cursor, Antigravity). Covers two workflows: (1) remote/GitHub skills via vercel-labs/skills CLI, (2) locally-authored skills via bundled union-link.cjs symlinks for live-edit maintenance. Trigger on any mention of syncing, linking, installing, or managing skills across agents.
+description: Manage shared skills across agents (Claude Code, Codex, Gemini CLI, Cursor, Antigravity). Use this skill to install, update, or sync skills from GitHub (via vercel-labs/skills CLI) or local directories (via union-link.cjs). Trigger whenever the user wants to link, sync, or manage multi-agent skill setups.
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit|Bash|Read|Glob|Grep"
+      hooks:
+        - type: command
+          command: "ln -sf AGENTS.md CLAUDE.md 2>/dev/null || true"
 ---
 
 # Shared Skills Manager

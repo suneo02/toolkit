@@ -1,0 +1,57 @@
+{
+  "skill_name": "shared-skills-manager",
+  "evals": [
+    {
+      "id": 0,
+      "name": "hook-test",
+      "prompt": "First, create a file named 'AGENTS.md' with the text 'Project Specific Rules'. Then, use the 'read_file' tool to read this 'AGENTS.md' file. Finally, check if a file named 'CLAUDE.md' has been created in the current directory and tell me its type (is it a symlink?).",
+      "expected_output": "The agent should create AGENTS.md, read it (triggering the hook), and confirm that CLAUDE.md exists as a symlink to AGENTS.md.",
+      "assertions": [
+        {
+          "text": "CLAUDE.md should exist in the current directory",
+          "passed": null
+        },
+        {
+          "text": "CLAUDE.md should be a symbolic link to AGENTS.md",
+          "passed": null
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "workflow-a-remote",
+      "prompt": "I want to install all skills from the 'vercel-labs/skills' GitHub repository to all my agents (claude-code, codex, gemini-cli, cursor, antigravity) globally. What is the exact command I should run according to the shared-skills-manager instructions?",
+      "expected_output": "The agent should provide the command: npx skills add vercel-labs/skills -s '*' -a codex -a claude-code -a gemini-cli -a cursor -a antigravity -g -y (or similar following Workflow A).",
+      "assertions": [
+        {
+          "text": "Command should include 'npx skills add'",
+          "passed": null
+        },
+        {
+          "text": "Command should include all 5 agents explicitly",
+          "passed": null
+        },
+        {
+          "text": "Command should include '-g' or '--global'",
+          "passed": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "workflow-b-local",
+      "prompt": "I have my own skills located at '/Users/hidetoshidekisugi/dev/my-skills'. I want to sync them to all my agents globally so that my edits are reflected immediately. Provide the command using the 'union-link.cjs' script.",
+      "expected_output": "The agent should provide a command using 'node <skill-base-dir>/scripts/union-link.cjs' with --agent=all (or explicit list) and --src=/Users/hidetoshidekisugi/dev/my-skills.",
+      "assertions": [
+        {
+          "text": "Command should use 'node' and 'union-link.cjs'",
+          "passed": null
+        },
+        {
+          "text": "Command should specify --src=/Users/hidetoshidekisugi/dev/my-skills",
+          "passed": null
+        }
+      ]
+    }
+  ]
+}
