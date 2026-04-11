@@ -41,29 +41,34 @@ function sync(targetDir, skillEntries, force, dryRun, relative) {
 
     if (entryExists(linkPath)) {
       if (!isSymlink(linkPath)) {
-        throw new Error(`Path exists and is not a symlink: ${linkPath}`);
+        if (!force) {
+          throw new Error(`Path exists and is not a symlink: ${linkPath}. Use --force to replace it.`);
+        }
+        // If force is true, we remove the existing directory/file to make room for the link
+        removePath(linkPath, dryRun);
+        stats.updated++;
+      } else {
+        const rawTarget = readLinkTarget(linkPath);
+        const resolvedCurrent = rawTarget
+          ? path.resolve(path.dirname(linkPath), rawTarget)
+          : null;
+        const resolvedDesired = path.resolve(sourceDir);
+
+        const currentReal = resolvedCurrent ? resolveReal(resolvedCurrent) : null;
+        const desiredReal = resolveReal(resolvedDesired) || resolvedDesired;
+
+        if (currentReal && desiredReal && currentReal === desiredReal) {
+          stats.skipped++;
+          continue;
+        }
+
+        if (!force) {
+          throw new Error(`Skill link conflict: ${linkPath} points elsewhere. Use --force to replace.`);
+        }
+
+        removePath(linkPath, dryRun);
+        stats.updated++;
       }
-
-      const rawTarget = readLinkTarget(linkPath);
-      const resolvedCurrent = rawTarget
-        ? path.resolve(path.dirname(linkPath), rawTarget)
-        : null;
-      const resolvedDesired = path.resolve(sourceDir);
-
-      const currentReal = resolvedCurrent ? resolveReal(resolvedCurrent) : null;
-      const desiredReal = resolveReal(resolvedDesired) || resolvedDesired;
-
-      if (currentReal && desiredReal && currentReal === desiredReal) {
-        stats.skipped++;
-        continue;
-      }
-
-      if (!force) {
-        throw new Error(`Skill link conflict: ${linkPath} points elsewhere. Use --force to replace.`);
-      }
-
-      removePath(linkPath, dryRun);
-      stats.updated++;
     } else {
       stats.linked++;
     }
