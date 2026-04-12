@@ -4,7 +4,7 @@ const path = require('path');
 const { parseArgs, usage } = require('./lib/args.cjs');
 const { ensureDir, resolveReal } = require('./lib/fs-utils.cjs');
 const { collectFromSource } = require('./lib/scanner.cjs');
-const { prune, sync } = require('./lib/sync-engine.cjs');
+const { prune, sync, syncDirLink } = require('./lib/sync-engine.cjs');
 const { getAgentConfig, detectInstalledAgents } = require('./lib/agents.cjs');
 
 async function main() {
@@ -35,20 +35,23 @@ async function main() {
   }
 
   try {
-    // 1. Scan source
-    const skillEntries = collectFromSource(args.src, args.skillNames);
+    // 1. Scan source (skipped in --link-dir mode)
+    let skillEntries = {};
+    if (!args.linkDir) {
+      skillEntries = collectFromSource(args.src, args.skillNames);
 
-    if (args.skillNames.length > 0) {
-      const foundNames = new Set(Object.keys(skillEntries));
-      const missing = args.skillNames.filter(name => !foundNames.has(name));
-      if (missing.length > 0) {
-        throw new Error(`Selected skill(s) not found in source: ${missing.join(', ')}\nSource: ${args.src}`);
+      if (args.skillNames.length > 0) {
+        const foundNames = new Set(Object.keys(skillEntries));
+        const missing = args.skillNames.filter(name => !foundNames.has(name));
+        if (missing.length > 0) {
+          throw new Error(`Selected skill(s) not found in source: ${missing.join(', ')}\nSource: ${args.src}`);
+        }
       }
-    }
 
-    if (Object.keys(skillEntries).length === 0) {
-      console.log('-> No skills found to link.');
-      return;
+      if (Object.keys(skillEntries).length === 0) {
+        console.log('-> No skills found to link.');
+        return;
+      }
     }
 
     // 2. Apply to each agent
@@ -63,23 +66,40 @@ async function main() {
         ? path.resolve(process.cwd(), agentConfig.localSkillsDir)
         : agentConfig.globalSkillsDir;
 
-      ensureDir(targetDir);
-
-      // Prune (Clean broken links)
-      if (args.cleanBroken) {
-        const removed = prune(targetDir, args.dryRun);
-        if (removed.length > 0) {
-          console.log(`[${agentName}] -> Removed ${removed.length} broken links`);
-        }
+      // Prevent circular linking: Skip if target is the same as source
+      if (path.resolve(targetDir) === path.resolve(args.src)) {
+        console.log(`! Skipping ${agentName} (${args.local ? 'local' : 'global'}) because target directory is the same as source.`);
+        continue;
       }
 
-      // Sync
-      const stats = sync(targetDir, skillEntries, args.force, args.dryRun, args.relative);
+      if (args.linkDir) {
+        // --link-dir mode: create a single symlink targetDir -> src
+        // Ensure the parent directory exists, not targetDir itself
+        ensureDir(path.dirname(targetDir));
+        const stats = syncDirLink(targetDir, args.src, args.force, args.dryRun, args.relative);
 
-      console.log(`✓ Union links updated for ${agentName} (${args.local ? 'local' : 'global'})`);
-      console.log(`  -> Source: ${args.src}`);
-      console.log(`  -> Target: ${targetDir}`);
-      console.log(`  -> Skills: ${Object.keys(skillEntries).length} (linked: ${stats.linked}, updated: ${stats.updated}, skipped: ${stats.skipped})`);
+        const action = stats.skipped ? 'already up to date' : stats.updated ? 'updated' : 'linked';
+        console.log(`✓ Dir link ${action} for ${agentName} (${args.local ? 'local' : 'global'})`);
+        console.log(`  -> ${targetDir} -> ${args.relative ? path.relative(path.dirname(targetDir), args.src) : args.src}`);
+      } else {
+        ensureDir(targetDir);
+
+        // Prune (Clean broken links)
+        if (args.cleanBroken) {
+          const removed = prune(targetDir, args.dryRun);
+          if (removed.length > 0) {
+            console.log(`[${agentName}] -> Removed ${removed.length} broken links`);
+          }
+        }
+
+        // Sync per-skill links
+        const stats = sync(targetDir, skillEntries, args.force, args.dryRun, args.relative);
+
+        console.log(`✓ Union links updated for ${agentName} (${args.local ? 'local' : 'global'})`);
+        console.log(`  -> Source: ${args.src}`);
+        console.log(`  -> Target: ${targetDir}`);
+        console.log(`  -> Skills: ${Object.keys(skillEntries).length} (linked: ${stats.linked}, updated: ${stats.updated}, skipped: ${stats.skipped})`);
+      }
     }
 
     if (args.dryRun) {

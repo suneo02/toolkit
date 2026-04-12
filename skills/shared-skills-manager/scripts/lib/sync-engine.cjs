@@ -79,7 +79,53 @@ function sync(targetDir, skillEntries, force, dryRun, relative) {
   return stats;
 }
 
+/**
+ * Link the entire src directory as the agent's skills directory.
+ * Creates a single symlink at targetDir -> srcDir instead of per-skill links.
+ * Useful when source and target are in the same repo; new skills are picked up
+ * automatically without re-running the script.
+ */
+function syncDirLink(targetDir, srcDir, force, dryRun, relative) {
+  const stats = { linked: 0, updated: 0, skipped: 0 };
+
+  if (entryExists(targetDir)) {
+    if (!isSymlink(targetDir)) {
+      if (!force) {
+        throw new Error(`Path exists and is not a symlink: ${targetDir}. Use --force to replace it.`);
+      }
+      removePath(targetDir, dryRun);
+      stats.updated++;
+    } else {
+      const rawTarget = readLinkTarget(targetDir);
+      const resolvedCurrent = rawTarget
+        ? path.resolve(path.dirname(targetDir), rawTarget)
+        : null;
+      const resolvedDesired = path.resolve(srcDir);
+
+      const currentReal = resolvedCurrent ? resolveReal(resolvedCurrent) : null;
+      const desiredReal = resolveReal(resolvedDesired) || resolvedDesired;
+
+      if (currentReal && desiredReal && currentReal === desiredReal) {
+        stats.skipped++;
+        return stats;
+      }
+
+      if (!force) {
+        throw new Error(`Dir link conflict: ${targetDir} already points elsewhere. Use --force to replace.`);
+      }
+      removePath(targetDir, dryRun);
+      stats.updated++;
+    }
+  } else {
+    stats.linked++;
+  }
+
+  createSymlink(srcDir, targetDir, dryRun, relative);
+  return stats;
+}
+
 module.exports = {
   prune,
-  sync
+  sync,
+  syncDirLink
 };

@@ -10,12 +10,14 @@ function parseArgs(argv) {
     cleanBroken: true,
     force: false,
     dryRun: false,
-    relative: false
+    relative: false,
+    linkDir: false
   };
 
   for (const raw of argv) {
     if (raw === '--force') args.force = true;
     else if (raw === '--dry-run') args.dryRun = true;
+    else if (raw === '--link-dir') args.linkDir = true;
     else if (raw === '--clean-broken') args.cleanBroken = true;
     else if (raw === '--no-clean-broken') args.cleanBroken = false;
     else if (raw === '--relative') args.relative = true;
@@ -57,6 +59,11 @@ Options:
   --local                 Link to project-local skills dir instead of global
   --skill=<name>          Only link one skill by name (repeatable)
   --skills=<a,b,c>        Only link specific skill names (comma-separated)
+  --link-dir              Link the entire src directory as the agent's skills dir
+                          instead of creating per-skill symlinks. Useful when
+                          source and target are in the same repo — new skills are
+                          picked up automatically without re-running this script.
+                          Pair with --relative for portable, repo-local use.
   --clean-broken          Remove broken symlinks in target dir (default: true)
   --no-clean-broken       Disable automatic broken link removal
   --force                 Replace existing links pointing elsewhere

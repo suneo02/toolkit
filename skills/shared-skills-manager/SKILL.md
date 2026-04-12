@@ -1,6 +1,6 @@
 ---
 name: shared-skills-manager
-description: Manage shared agent skills (specialized capability directories containing SKILL.md) across different platforms (Claude Code, Codex, Gemini CLI, Cursor, Antigravity). Use this skill EXCLUSIVELY for installing, updating, or syncing these specialized skills from GitHub (via vercel-labs/skills CLI) or local directories (via union-link.cjs). DO NOT use this skill for general file management or symlinking regular project files (like .md or .js files) unless they are part of a skill structure. Trigger this whenever the user mentions "linking skills", "syncing skills", or "installing agent capabilities".
+description: Manage shared agent skills across platforms (Claude Code, Codex, Gemini CLI, Cursor, Antigravity). ALWAYS use ask_user to confirm whether to apply changes globally or project-locally before installing, updating, or syncing skills. Trigger this whenever the user mentions "linking skills", "syncing skills", or "installing agent capabilities".
 hooks:
   PreToolUse:
     - matcher: "Write|Edit|Bash|Read|Glob|Grep"
@@ -11,14 +11,13 @@ hooks:
 
 # Shared Skills Manager
 
-管理跨 agent 共享的 skills，支持两种工作流：
+管理跨 agent 共享的 skills，支持两种工作流。**在执行任何安装或链接操作前，必须先确认作用域 (Scope)。**
 
-| 场景 | 方式 | 特点 |
-|---|---|---|
-| **网上/GitHub skills** | `npx skills add` (vercel-labs/skills CLI) | 下载到 `~/.agents/skills/`，再 symlink 到各 agent |
-| **自写 skills** | `node <skill-base-dir>/scripts/union-link.cjs` | 直接 symlink 到源目录，编辑即生效 |
+## 确认作用域 (Confirm Scope)
+**必须**使用 `ask_user` 工具询问用户是将 skill 安装到全局还是仅限当前项目。
 
-> **`<skill-base-dir>`** = 加载本 skill 时系统提示的 `Base directory`（如 `~/.claude/skills/shared-skills-manager`）。
+- **Global (全局)**：安装到 `~/.agents/skills/` 或各 agent 的全局配置目录。适用于通用的、跨项目使用的能力。**通常使用绝对路径**，以确保在任何位置都能访问源。
+- **Local (局部)**：安装到当前项目的 `.agents/skills` 或 `.claude/skills` 等目录。适用于仅在本仓库内使用的私有或定制能力。**推荐使用相对路径 (`--relative`)**，以便在移动或分享仓库时链接依然有效。
 
 ---
 
@@ -116,6 +115,19 @@ node <skill-base-dir>/scripts/union-link.cjs \
   --src=<your-skills-dir> \
   --skill=my-skill-name
 
+# Project-Local 链接 (推荐带上 --relative)
+node <skill-base-dir>/scripts/union-link.cjs \
+  --agent=all \
+  --src=<your-skills-dir> \
+  --local --relative
+
+# 目录级链接 —— source 在同一仓库内时推荐
+# targetDir 本身变成指向 src 的 symlink，新增/删除 skill 无需重跑
+node <skill-base-dir>/scripts/union-link.cjs \
+  --agent=claude-code \
+  --src=<your-skills-dir> \
+  --local --link-dir --relative
+
 # dry-run 预览（不实际变更）
 node <skill-base-dir>/scripts/union-link.cjs \
   --agent=claude-code \
@@ -136,6 +148,7 @@ node <skill-base-dir>/scripts/union-link.cjs \
 | `--agent=<names\|all>` | 目标 agent，逗号分隔，或 `all`（自动检测已安装） |
 | `--src=<path>` | 源 skills 目录（必须） |
 | `--local` | link 到 project-local 目录而非 global |
+| `--link-dir` | 目录级链接：把 targetDir 本身变成指向 src 的 symlink，而非在其中创建逐个 skill 的子链接。source 在同一仓库内时推荐，配合 `--relative` 使用 |
 | `--skill=<name>` | 只 link 指定 skill（可重复） |
 | `--skills=<a,b,c>` | 逗号分隔的 skill 列表 |
 | `--force` | 替换已存在但指向其他位置的 link |
