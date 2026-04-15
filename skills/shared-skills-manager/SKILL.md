@@ -198,5 +198,6 @@ your-skills/
 
 - 同名 skill 会被覆盖，使用带命名空间的名称避免冲突。
 - `union-link.cjs` 遇到非 symlink 的同名路径会报错，不会覆盖真实目录。
+- **Windows 权限说明**：在 Windows 上，使用 `--relative` 创建符号链接可能因权限不足导致 `EPERM` 错误。若遇到此问题，请**移除 `--relative` 参数**改用绝对路径。此时脚本会使用 `junction`（联接点），通常无需管理员权限即可成功。
 - `--force` 不加时，若已有 link 指向其他位置会报错。
 - 私有 GitHub repo 需设置 `GITHUB_TOKEN`、`GH_TOKEN` 或 `gh auth token`。
